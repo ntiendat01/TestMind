@@ -2,14 +2,14 @@
 
 ## Stack
 Next.js (App Router) + TypeScript strict + Tailwind + shadcn/ui + TanStack Query.
-API client sinh từ OpenAPI (`openapi-typescript` + `openapi-fetch`), script `pnpm gen:api`.
+API client sinh từ OpenAPI (`openapi-typescript` + `openapi-fetch`). `pnpm gen:api` gọi `scripts/gen_api_client.sh`.
 UI mặc định tiếng Việt, chuỗi tập trung trong `lib/i18n/vi.ts` (dễ thêm tiếng Anh).
 
 ## Nguyên tắc
 - Frontend **không chứa logic RAG**, không giữ API key LLM. Chỉ gọi `apps/api`.
 - Phần lớn trang là Client Component có TanStack Query; dùng Server Component cho layout/tĩnh.
 - Mọi call API đi qua `lib/api/`; không `fetch` trong component.
-- Component < 150 dòng; file < 500 dòng (luật cứng trong AGENT.md).
+- Component < 150 dòng; file < 500 dòng (luật cứng trong `AGENT.md` ở gốc repo).
 
 ## Cấu trúc thư mục
 

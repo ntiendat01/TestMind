@@ -20,7 +20,7 @@ query
 - Regex ID: `REQ-\d+`, `TC-\d+`, `BUG-\d+` (cấu hình được) → **exact lookup** ưu tiên cao nhất.
 - Filter rõ ràng từ request: `doc_types[]`, `module`, `version` (mặc định chỉ `is_active`).
 - Query rewriting/decomposition: **không có trong MVP**. Chỉ thêm khi eval cho thấy nhóm câu multi-hop
-  thất bại nhiều (xem `05-evaluation.md`).
+  thất bại nhiều (xem `docs/specs/05-evaluation.md`).
 
 ## 2. Các nhánh truy xuất
 

@@ -5,7 +5,7 @@
 ## M0 — Scaffold (2–4 ngày)
 **Deliverables:** monorepo (`apps/web`, `apps/api`, `crates/tm-core`, `eval`, `docs`, `bench`), Docker Compose
 (web, api, postgres+pgvector), `Makefile` (`check`, `test`, `eval-dev`, `reindex`), CI GitHub Actions,
-script `check_file_length` (fail nếu file > 500 dòng, chỉ miễn lockfile + file `AUTO-GENERATED`), `.env.example`,
+script `scripts/check_file_length.py` (fail nếu file > 500 dòng, chỉ miễn lockfile + file `AUTO-GENERATED`), `.env.example`,
 health check, sinh OpenAPI client.
 **Acceptance:** `docker compose up` chạy 3 service; `make check` xanh trên repo rỗng; CI chạy được.
 **Rủi ro:** toolchain Rust/maturin trong Docker; dành thời gian nhưng chưa viết logic Rust.
@@ -15,7 +15,7 @@ health check, sinh OpenAPI client.
 pgvector; Q&A có citation + từ chối; Next.js `/documents` + `/chat` (SSE, Source panel); dataset giả lập v1.
 **Acceptance:** demo end-to-end; upload lại cùng file không trùng chunk; citation mở đúng vị trí; câu ngoài phạm vi bị từ chối.
 **Rủi ro:** parse Excel/bảng; UI nuốt thời gian; dataset yếu.
-**Phụ thuộc:** spec 01, 02 (dense), 03, 06.
+**Phụ thuộc:** `docs/specs/01-ingestion.md`, `docs/specs/02-retrieval.md` (dense), `docs/specs/03-generation-citation.md`, `docs/specs/06-frontend.md`.
 
 ## M2 — Evaluation Harness (1–1.5 tuần) ← làm sớm, trước khi tối ưu
 **Deliverables:** `eval/` runner, dev/test split, 60–100 câu (có unanswerable + adversarial),

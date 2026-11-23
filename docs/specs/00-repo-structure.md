@@ -1,6 +1,6 @@
 # Spec 00 — Cấu trúc repository
 
-Monorepo. Mỗi file ≤ 500 dòng (luật cứng, xem `AGENT.md`); cây dưới đây được thiết kế để file nhỏ, mỗi file một trách nhiệm.
+Monorepo. Mỗi file ≤ 500 dòng (luật cứng, xem `AGENT.md` ở gốc repo); cây dưới đây được thiết kế để file nhỏ, mỗi file một trách nhiệm.
 
 ## Cây thư mục
 
@@ -68,7 +68,7 @@ testmind-ai/
 │   │       ├── fakes/            # fake LLM/embedder
 │   │       └── fixtures/         # docx/xlsx/md nhỏ cho test
 │   │
-│   └── web/                      # Next.js (xem spec 06)
+│   └── web/                      # Next.js (xem docs/specs/06-frontend.md)
 │       ├── package.json, tsconfig.json, next.config.ts, tailwind.config.ts
 │       ├── Dockerfile
 │       ├── app/(app)/{documents,chat,trace,eval,history}/page.tsx
@@ -79,7 +79,7 @@ testmind-ai/
 │       └── tests/{unit,e2e}/
 │
 ├── crates/
-│   └── tm-core/                  # Rust (xem spec 07)
+│   └── tm-core/                  # Rust (xem docs/specs/07-rust-core.md)
 │       ├── Cargo.toml
 │       ├── pyproject.toml        # maturin
 │       ├── src/
@@ -139,19 +139,19 @@ testmind-ai/
 | Phụ thuộc đi một chiều | `routers → services → (db/repositories, clients, lexical, parsers, tm_core)`; `services/*` không import vòng tròn |
 | Tách file | Chạm ~400 dòng thì tách module; hàm < 50 dòng, file < 300 dòng là mục tiêu |
 | Tên file/test | Test phản chiếu cấu trúc nguồn: `app/services/retrieval/fusion.py` ↔ `tests/unit/services/retrieval/test_fusion.py` |
-| Interface | Chỉ khai báo ở `core/interfaces.py`; cài đặt Python (`lexical/python_ref.py`) và Rust (`tm_core_adapter.py`) đều tuân thủ |
+| Interface | Chỉ khai báo ở `apps/api/app/core/interfaces.py`; cài đặt Python (`apps/api/app/lexical/python_ref.py`) và Rust (`apps/api/app/lexical/tm_core_adapter.py`) đều tuân thủ |
 | Cấu hình | Tham số thí nghiệm nằm ở `config/`, không hard-code trong service; mỗi eval run lưu snapshot |
 | Dữ liệu | `eval/datasets/*/corpus` chỉ chứa dữ liệu giả lập/công khai; file lớn dùng script sinh, không commit |
-| Sinh tự động | File sinh (OpenAPI client) có header `AUTO-GENERATED`, không sửa tay |
-| Chủ sở hữu thay đổi | Đổi `schemas/parsed.py` ⇔ đổi `crates/tm-core/src/types.rs` + golden test + spec 07 trong cùng commit |
+| Sinh tự động | File sinh (OpenAPI client) có header `AUTO-GENERATED`, không sửa tay. `make gen-api` và `pnpm gen:api` đều gọi `scripts/gen_api_client.sh` |
+| Chủ sở hữu thay đổi | Đổi `apps/api/app/schemas/parsed.py` ⇔ đổi `crates/tm-core/src/types.rs` + golden test + `docs/specs/07-rust-core.md` trong cùng commit |
 
 ## Thứ tự dựng cây (khớp roadmap)
 
-- **M0:** tạo toàn bộ khung thư mục, `Makefile`, Compose, CI, `check_file_length.py`, health check; thư mục chưa dùng chỉ có `.gitkeep`.
-- **M1:** `parsers/`, `chunking/`, `services/ingestion`, `services/retrieval` (dense), `services/generation`, `routers`, `apps/web` (documents/chat).
-- **M2:** `eval/`, `services/eval`, `config/exp/baseline.yaml`.
-- **M3:** `lexical/`, `services/retrieval/{fusion,rerank}`, `crates/tm-core`, `bench/`.
-- **M4:** `services/trace`, `routers/trace.py`, `apps/web/trace`.
+- **M0:** tạo toàn bộ khung thư mục, `Makefile`, Compose, CI, `scripts/check_file_length.py`, health check; thư mục chưa dùng chỉ có `.gitkeep`.
+- **M1:** `apps/api/app/parsers/`, `apps/api/app/chunking/`, `apps/api/app/services/ingestion/`, `apps/api/app/services/retrieval/` (dense), `apps/api/app/services/generation/`, `apps/api/app/routers/`, `apps/web` (`documents`, `chat`).
+- **M2:** `eval/`, `apps/api/app/services/eval/`, `config/exp/baseline.yaml`.
+- **M3:** `apps/api/app/lexical/`, `apps/api/app/services/retrieval/` (`fusion.py`, `rerank.py`), `crates/tm-core/`, `bench/`.
+- **M4:** `apps/api/app/services/trace/`, `apps/api/app/routers/trace.py`, `apps/web/app/(app)/trace/`.
 - **M5:** hoàn thiện CI, E2E, logging, deploy, README.
 
 ## Acceptance

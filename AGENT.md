@@ -1,7 +1,7 @@
 # AGENT.md — Quy tắc làm việc cho AI agent (TestMind AI)
 
 > File này là luật. Đọc hết trước khi sửa bất kỳ thứ gì.
-> Nếu dùng Claude Code / Codex, copy hoặc symlink file này thành `CLAUDE.md` / `AGENTS.md`.
+> Luật nằm ở file này (`AGENT.md`, gốc repo). Không tạo thêm `AGENTS.md`.
 
 ## 0. Quy tắc tối thượng
 
@@ -11,7 +11,7 @@
      `AUTO-GENERATED` (ví dụ OpenAPI client).
    - File sắp chạm \~400 dòng thì **tách module trước khi thêm tiếp**, đừng đợi vượt.
    - Mục tiêu thực tế: hàm < 50 dòng, file < 300 dòng. 500 là trần cứng, không phải mục tiêu.
-   - CI chạy `scripts/check_file_length` và fail nếu vi phạm. Không được sửa script để né.
+   - CI chạy `scripts/check_file_length.py` và fail nếu vi phạm. Không được sửa script để né.
 2. **KHÔNG BỊA SỐ LIỆU.** Không tự điền kết quả benchmark, latency, accuracy, chi phí.
    Số liệu chỉ được lấy từ lần chạy thật (`eval/reports/`, `bench/results/`). Chưa đo thì ghi `TBD`.
 3. **KHÔNG SỬA TEST SET ĐÃ KHÓA** (`eval/datasets/*/test.jsonl`). Chỉ con người được sửa.
@@ -36,17 +36,17 @@ Cây thư mục đầy đủ và quy ước đặt file: **docs/specs/00-repo-st
 ```javascript
 apps/web/        Next.js (TypeScript)       — chỉ UI, không chứa logic RAG
 apps/api/        FastAPI (Python)           — orchestration, LLM, embedding, rerank, eval
-crates/tm-core/  Rust (PyO3, maturin)       — parse/chunk/BM25/fusion/metrics (xem 07-rust-core)
+crates/tm-core/  Rust (PyO3, maturin)       — parse/chunk/BM25/fusion/metrics (xem docs/specs/07-rust-core.md)
 eval/            dataset, runner, reports
 docs/            architecture + specs + ADR
 ```
 
 - `apps/web` **không** gọi LLM/DB trực tiếp; chỉ gọi `apps/api`.
-- `apps/api/services/*` không import lẫn nhau vòng tròn; phụ thuộc đi một chiều
-  `routers → services → (repositories, clients, tm_core)`.
+- `apps/api/app/services/*` không import lẫn nhau vòng tròn; phụ thuộc đi một chiều
+  `routers → services → (db/repositories, clients, lexical, parsers, tm_core)`.
 - Logic nghiệp vụ không nằm trong router. Router chỉ validate, gọi service, trả kết quả.
 - Mọi thành phần có thể hoán đổi (chunker, lexical index, reranker, LLM) đi qua **interface/Protocol**
-  định nghĩa trong `apps/api/core/interfaces.py` để eval chạy A/B bằng config.
+  định nghĩa trong `apps/api/app/core/interfaces.py` để eval chạy A/B bằng config.
 
 ## 3. Tiêu chuẩn code
 
@@ -73,7 +73,7 @@ docs/            architecture + specs + ADR
 **TypeScript (apps/web)**
 
 - Next.js App Router, TypeScript strict, ESLint, Prettier. Component < 150 dòng; tách hook/util.
-- API client sinh từ OpenAPI (`pnpm gen:api`). Không viết tay type trùng với schema backend.
+- API client sinh từ OpenAPI (`pnpm gen:api`, gọi `scripts/gen_api_client.sh`). Không viết tay type trùng với schema backend.
 - Không dùng `any`. Không `fetch` rải rác trong component; dùng lớp `lib/api/`.
 
 ## 4. Phụ thuộc & công nghệ

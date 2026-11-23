@@ -8,9 +8,9 @@ cập nhật/xoá không gây trùng lặp.
 
 | Định dạng | MVP | Parser | Ghi chú |
 |---|---|---|---|
-| `.md`, `.txt` | ✅ | Rust `parse::md` (txt: coi như một section) | Heading tree |
+| `.md`, `.txt` | ✅ | Python (M1). Rust `parse::md` ở M3 | Heading tree |
 | `.docx` | ✅ | Python `python-docx` (Rust hoãn) | Heading, đoạn, bảng |
-| `.xlsx`, `.csv` | ✅ | Rust `parse::xlsx/csv` (có bản Python `openpyxl` tham chiếu) | Mỗi dòng = một record |
+| `.xlsx`, `.csv` | ✅ | Python `openpyxl` / `csv` (M1). Rust ở M3 | Mỗi dòng = một record |
 | `.pdf` (có text) | Phase 2 | Python (`pymupdf`) | Không OCR |
 | PDF scan | ❌ | — | Ngoài scope |
 
@@ -66,7 +66,11 @@ Tham số mặc định (trong `config/chunking.yaml`, **phải tune trên dev s
 
 ## Trạng thái job
 
+`job_id` là `document_versions.id`.
+
 `queued → parsing → chunking → embedding → indexing → ready` hoặc `failed`. Lưu `progress` (0–100) và `error`.
+
+Lát cắt Markdown xử lý đồng bộ trong request. Client nhận `202`, rồi `GET /v1/jobs/{id}` thấy `ready` hoặc `failed`. Định dạng khác Markdown trả `400` cho tới khi parser của định dạng đó có mặt.
 
 ## Embedding
 
@@ -80,7 +84,7 @@ Tham số mặc định (trong `config/chunking.yaml`, **phải tune trên dev s
 - Bảng nhiều dòng → mỗi chunk con có header.
 - Excel có cột thiếu/ô trống/ô gộp → không crash, ghi cảnh báo.
 - File sai định dạng/quá lớn → lỗi 4xx rõ ràng.
-- Rust parser và Python parser tham chiếu cho **cùng kết quả** trên fixture (golden test).
+- So sánh Rust và Python trên cùng fixture là cổng của M3. M1 kiểm tra parser Python.
 
 ## Acceptance
 - Ingest bộ dataset mẫu end-to-end không lỗi; mỗi chunk có `section_path`/`loc` đủ để mở lại nguồn gốc.

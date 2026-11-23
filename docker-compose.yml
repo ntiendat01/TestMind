@@ -16,10 +16,21 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   api:
-    build: ./apps/api
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
     environment:
       APP_NAME: ${APP_NAME:-TestMind API}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://testmind:testmind@postgres:5432/testmind}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://testmind:testmind@postgres:5432/testmind}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.inference.wandb.ai/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-ai/DeepSeek-V4.1-Flash-1017}
+      EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-bge-m3}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-m3}
+      CONFIG_DIR: /srv/config
+      RAW_DIR: /srv/data/raw
+    volumes:
+      - api_raw:/srv/data
     ports:
       - "8000:8000"
     depends_on:
@@ -41,3 +52,4 @@ services:
 
 volumes:
   pgdata:
+  api_raw:

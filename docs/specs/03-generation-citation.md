@@ -44,6 +44,8 @@ Chỉ số: `citation_validity` (tự động) và `citation_support` (chấm ta
 Sự kiện: `retrieval` (nguồn tìm được), `token` (delta), `final` (JSON đã kiểm chứng), `usage`
 (token in/out, latency, cost), `error`. Client phải xử lý huỷ giữa chừng.
 
+`token` chỉ được phát khi delta là phần field `answer`, không phải JSON thô. Lát cắt đầu gửi `retrieval`, `final`, `usage`.
+
 ## Từ chối & ngoài phạm vi
 
 - Lớp 1: sufficiency check ở retrieval (spec 02). Lớp 2: `insufficient_evidence` từ LLM.

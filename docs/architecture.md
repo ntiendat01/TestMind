@@ -19,7 +19,7 @@ Ngoài scope MVP: Bug-vs-Not-a-Bug, sinh test case hàng loạt, auth đa ngư�
 | 5 | Lexical search | Python reference → **tantivy (trong tm-core)** | BM25 thật, tokenizer tuỳ biến cho tiếng Việt | Index phụ cần rebuild được |
 | 6 | Embedding | **BGE-M3** (local, dense) | Đa ngôn ngữ, gồm tiếng Việt | Cần RAM/CPU; benchmark trên dữ liệu thật |
 | 7 | Reranker | bge-reranker-v2-m3 (tuỳ chọn, Phase 2) | Chỉ giữ nếu eval chứng minh có lợi | Latency |
-| 8 | LLM | OpenAI-compatible API qua `LLMClient` | Đổi provider bằng config | Chi phí/rate limit cần xác minh |
+| 8 | LLM | **DeepSeek-V4.1-Flash** qua W&B Inference (`https://api.inference.wandb.ai/v1`) | Client tương thích OpenAI | Ngân sách ngày chưa đặt |
 | 9 | Framework RAG | **Không dùng** (tự viết mỏng) | Kiểm soát + giải thích được khi phỏng vấn | Viết nhiều hơn |
 | 10 | Deploy | Docker Compose | Đủ cho solo project | Không autoscale |
 
@@ -149,7 +149,7 @@ sequenceDiagram
 |---|---|
 | `documents` | id, name, doc_type (`brd`/`srs`/`testcase`/`bug`/`api`/`process`), module, created_at |
 | `document_versions` | id, document_id, version, content_hash, is_active, status, error, uploaded_at |
-| `chunks` | id (deterministic), version_id, ordinal, text, text_for_embedding, section_path, loc (JSONB: page/sheet/row/cell), requirement_ids text[], token_count, embedding vector(1024), is_active |
+| `chunks` | id (deterministic), version_id, ordinal, text, text_for_embedding, section_path, loc (JSONB: page/sheet/row/cell/paragraph_idx), requirement_ids text[], token_count, embedding vector(1024), embedding_model, is_active |
 | `requirements` | id, version_id, req_key (vd `REQ-045`), title, text, chunk_id |
 | `test_cases` | id, version_id, tc_key, title, steps, expected, linked_req_keys text[], module, priority, chunk_id |
 | `bugs` | id, version_id, bug_key, title, repro_steps, actual, expected, module, env, status, chunk_id |
@@ -166,7 +166,7 @@ btree trên `(version_id, ordinal)`.
 
 | Endpoint | Mục đích |
 |---|---|
-| `POST /v1/documents` | Upload, trả `job_id` |
+| `POST /v1/documents` | Upload, trả `job_id` (`document_versions.id`) |
 | `GET /v1/documents` / `DELETE /v1/documents/{id}` | Liệt kê / xoá (xoá chunk, vector, index) |
 | `GET /v1/jobs/{id}` | Trạng thái indexing |
 | `POST /v1/query` | Hỏi đáp (SSE streaming) |

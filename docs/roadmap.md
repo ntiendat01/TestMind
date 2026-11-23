@@ -51,11 +51,11 @@ trang phân tích lỗi + báo cáo benchmark cuối.
 5. Similar-bug, test-case recommendation, eval UI — làm sau.
 
 ## 5 quyết định cần chốt sớm
-1. Domain dataset (E-commerce refund/checkout hoặc Hotel booking) + schema file test case Excel mẫu.
-2. Cấu hình chunking mặc định và đơn vị chunk cho Excel.
-3. Embedding local (cần máy đủ RAM) hay qua API.
-4. Provider LLM + giới hạn rate/chi phí (cần xác minh giá hiện tại).
-5. Cách gán và kiểm tra ground truth (ai gán, bao nhiêu mẫu gán đôi).
+1. Domain dataset: **refund/checkout**. Schema Excel mẫu vẫn để lúc làm parser bảng.
+2. Cấu hình chunking: giả thuyết `target_tokens=400`, `max_tokens=800`, `overlap_tokens=50`. Excel: 1 chunk mỗi dòng. Chưa tune.
+3. Embedding: **local BGE-M3** (`BAAI/bge-m3`, 1024 chiều).
+4. LLM: **DeepSeek-V4.1-Flash** tại `https://api.inference.wandb.ai/v1`, model `deepseek-ai/DeepSeek-V4.1-Flash-1017`. Ngân sách ngày chưa đặt số.
+5. Cách gán và kiểm tra ground truth (ai gán, bao nhiêu mẫu gán đôi). Chưa chốt; thuộc M2.
 
 ## Chi phí & triển khai (cần xác minh giá hiện tại)
 - Embedding: local BGE-M3 (không tốn tiền API; tốn CPU/RAM). Nếu dùng API, cần kiểm tra bảng giá.

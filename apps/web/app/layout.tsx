@@ -7,13 +7,13 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: vi.shellTitle,
-  description: vi.shellBody,
+  description: vi.documentsLead,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="vi">
-      <body className="bg-neutral-50 text-neutral-950 antialiased">{children}</body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

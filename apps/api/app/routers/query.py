@@ -49,6 +49,7 @@ def _events(outcome: QueryOutcome) -> Iterator[str]:
             "section_path": list(hit.chunk.section_path),
             "loc": hit.chunk.loc,
             "document_name": hit.chunk.document_name,
+            "text": hit.chunk.text,
         }
         for hit in outcome.hits
     ]
@@ -78,6 +79,7 @@ def _events(outcome: QueryOutcome) -> Iterator[str]:
         "tokens_in": outcome.tokens_in,
         "tokens_out": outcome.tokens_out,
         "prompt_version": outcome.prompt_version,
+        "latency_ms": outcome.latency_ms,
     }
     yield _event("retrieval", retrieval)
     yield _event("final", final)

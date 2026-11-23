@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from app.schemas.parsed import ChunkDraft
-from app.schemas.records import SearchHit, StoredVersion
+from app.schemas.records import DocumentSummary, SearchHit, StoredVersion
 
 
 class TokenCounter(Protocol):
@@ -55,6 +55,8 @@ class DocumentStore(Protocol):
     ) -> StoredVersion: ...
 
     def get_version(self, version_id: str) -> StoredVersion | None: ...
+
+    def list_documents(self) -> list[DocumentSummary]: ...
 
     def search_dense(
         self,

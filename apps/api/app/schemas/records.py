@@ -60,6 +60,19 @@ class ClaimOut:
 
 
 @dataclass
+class DocumentSummary:
+    document_id: str
+    name: str
+    doc_type: str
+    module: str | None
+    version_id: str
+    version: int
+    status: str
+    chunk_count: int
+    error: str | None
+
+
+@dataclass
 class QueryOutcome:
     insufficient_evidence: bool
     answer: str
@@ -69,3 +82,4 @@ class QueryOutcome:
     prompt_version: str
     tokens_in: int
     tokens_out: int
+    latency_ms: int = 0

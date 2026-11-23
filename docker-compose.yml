@@ -28,6 +28,7 @@ services:
       EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-bge-m3}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-m3}
       CONFIG_DIR: /srv/config
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
       RAW_DIR: /srv/data/raw
     volumes:
       - api_raw:/srv/data

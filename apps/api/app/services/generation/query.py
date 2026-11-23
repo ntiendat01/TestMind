@@ -46,6 +46,7 @@ def answer_query(
             hits=hits,
         )
     elapsed = int((time.perf_counter() - started) * 1000)
+    outcome.latency_ms = elapsed
     store.save_query(
         text=question,
         filters={"doc_types": doc_types, "module": module},

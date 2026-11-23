@@ -43,6 +43,8 @@ def test_query_cites_the_matching_section(tmp_path: Path) -> None:
     job = client.get(f"/v1/jobs/{job_id}")
     assert job.json()["status"] == "ready"
     assert job.json()["chunk_count"] >= 1
+    listed = client.get("/v1/documents")
+    assert listed.json()[0]["name"] == "refund.md"
 
     response = client.post("/v1/query", json={"query": "điều kiện hoàn tiền"})
     assert response.status_code == 200

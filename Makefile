@@ -16,6 +16,7 @@ typecheck:
 test:
 	cd apps/api && uv run pytest
 	cd apps/api && uv run pytest --override-ini="testpaths=" ../../scripts/test_check_file_length.py
+	cd apps/web && pnpm test
 
 smoke eval-dev eval-test:
 	python3 eval/cli.py

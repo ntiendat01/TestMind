@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from app.core.ids import new_id
 from app.db.models import ChunkRow, DocumentRow, DocumentVersionRow, QueryRow
 from app.schemas.parsed import ChunkDraft
-from app.schemas.records import SearchHit, StoredChunk, StoredVersion
+from app.schemas.records import DocumentSummary, SearchHit, StoredChunk, StoredVersion
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -30,6 +30,36 @@ class PostgresDocumentStore:
         with self._sessions() as session:
             row = session.get(DocumentVersionRow, version_id)
             return None if row is None else _version(session, row)
+
+    def list_documents(self) -> list[DocumentSummary]:
+        with self._sessions() as session:
+            rows = session.execute(
+                select(DocumentVersionRow, DocumentRow)
+                .join(DocumentRow, DocumentRow.id == DocumentVersionRow.document_id)
+                .order_by(DocumentVersionRow.uploaded_at.desc())
+                .limit(50)
+            ).all()
+            summaries: list[DocumentSummary] = []
+            for version, document in rows:
+                count = session.scalar(
+                    select(func.count())
+                    .select_from(ChunkRow)
+                    .where(ChunkRow.version_id == version.id)
+                )
+                summaries.append(
+                    DocumentSummary(
+                        document_id=document.id,
+                        name=document.name,
+                        doc_type=document.doc_type,
+                        module=document.module,
+                        version_id=version.id,
+                        version=version.version,
+                        status=version.status,
+                        chunk_count=int(count or 0),
+                        error=version.error,
+                    )
+                )
+            return summaries
 
     def save_ready(
         self,

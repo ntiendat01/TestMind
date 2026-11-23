@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from app.core.ids import new_id
 from app.schemas.parsed import ChunkDraft
-from app.schemas.records import SearchHit, StoredChunk, StoredVersion
+from app.schemas.records import DocumentSummary, SearchHit, StoredChunk, StoredVersion
 
 
 class MemoryDocumentStore:
@@ -22,6 +22,24 @@ class MemoryDocumentStore:
 
     def get_version(self, version_id: str) -> StoredVersion | None:
         return self.versions.get(version_id)
+
+    def list_documents(self) -> list[DocumentSummary]:
+        summaries: list[DocumentSummary] = []
+        for version in reversed(list(self.versions.values())):
+            summaries.append(
+                DocumentSummary(
+                    document_id=version.document_id,
+                    name=version.document_name,
+                    doc_type=version.doc_type,
+                    module=version.module,
+                    version_id=version.id,
+                    version=version.version,
+                    status=version.status,
+                    chunk_count=version.chunk_count,
+                    error=version.error,
+                )
+            )
+        return summaries[:50]
 
     def save_ready(
         self,

@@ -1,6 +1,7 @@
 """FastAPI application factory."""
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.container import Container, build_container
@@ -17,6 +18,12 @@ def create_app(container: Container | None = None) -> FastAPI:
     configure_logging()
     settings = get_settings() if container is None else container.settings
     app = FastAPI(title=settings.app_name)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.web_origin],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.state.container = container or build_container(settings)
     app.include_router(health_router)
     app.include_router(documents_router)

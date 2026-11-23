@@ -17,6 +17,24 @@ def get_container(request: Request) -> Container:
     return container
 
 
+@router.get("/v1/documents")
+def list_documents(container: Container = Depends(get_container)) -> list[dict[str, object]]:
+    return [
+        {
+            "document_id": item.document_id,
+            "name": item.name,
+            "doc_type": item.doc_type,
+            "module": item.module,
+            "version_id": item.version_id,
+            "version": item.version,
+            "status": item.status,
+            "chunk_count": item.chunk_count,
+            "error": item.error,
+        }
+        for item in container.store.list_documents()
+    ]
+
+
 @router.post("/v1/documents", status_code=202)
 def upload_document(
     file: UploadFile = File(...),

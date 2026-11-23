@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     app_name: str = "TestMind API"
+    web_origin: str = "http://localhost:3000"
     database_url: str = "postgresql+psycopg://testmind:testmind@localhost:5432/testmind"
     llm_base_url: str = "https://api.inference.wandb.ai/v1"
     llm_api_key: str = ""

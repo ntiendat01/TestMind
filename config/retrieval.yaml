@@ -1,0 +1,8 @@
+# Initial hypotheses from docs/specs/02-retrieval.md. Tune on the dev set; not a measured result.
+dense_top_n: 30
+lexical_top_n: 30
+rrf_k: 60
+rerank_enabled: false
+context_token_budget: 3000
+# Calibrate on the dev set in M2. Unset until then.
+sufficiency_tau: null

@@ -1,0 +1,15 @@
+"""Liveness endpoint."""
+
+from fastapi import APIRouter
+from pydantic import BaseModel
+
+router = APIRouter(tags=["health"])
+
+
+class HealthResponse(BaseModel):
+    status: str
+
+
+@router.get("/v1/health", response_model=HealthResponse)
+def read_health() -> HealthResponse:
+    return HealthResponse(status="ok")

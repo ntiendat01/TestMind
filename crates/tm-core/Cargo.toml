@@ -1,0 +1,9 @@
+[package]
+name = "tm-core"
+version = "0.0.0"
+edition = "2021"
+description = "TestMind CPU-bound core. PyO3 bindings arrive in M3."
+publish = false
+
+[lib]
+path = "src/lib.rs"

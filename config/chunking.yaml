@@ -1,0 +1,4 @@
+# Initial hypotheses from docs/specs/01-ingestion.md. Tune on the dev set; not a measured result.
+target_tokens: 400
+max_tokens: 800
+overlap_tokens: 50

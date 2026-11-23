@@ -1,148 +1,98 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
+import { PageBanner } from "@/components/ui/page-banner";
 import { askQuestion } from "@/lib/api/client";
-import type { FinalAnswer, SourceHit, Usage } from "@/lib/api/types";
-import { vi, type DocType } from "@/lib/i18n/vi";
+import { orderEvidence } from "@/lib/api/citations";
+import { requestFeedback } from "@/lib/api/feedback";
+import { vi } from "@/lib/i18n/vi";
+import { AnswerPanel, type AnswerState } from "./answer-panel";
+import { QuestionForm } from "./question-form";
+import { SourcePanel } from "./source-panel";
 
-const types = Object.keys(vi.docTypes) as DocType[];
+import styles from "./chat.module.css";
 
 export function AskDesk() {
   const [question, setQuestion] = useState("");
   const [docType, setDocType] = useState("");
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
-  const [hits, setHits] = useState<SourceHit[]>([]);
-  const [finalAnswer, setFinalAnswer] = useState<FinalAnswer | null>(null);
-  const [usage, setUsage] = useState<Usage | null>(null);
+  const [module, setModule] = useState("");
+  const [answer, setAnswer] = useState<AnswerState>({ kind: "idle" });
   const [selectedId, setSelectedId] = useState("");
-  const [controller, setController] = useState<AbortController | null>(null);
+  const [canReturn, setCanReturn] = useState(false);
+  const request = useRef<AbortController | null>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
+  const panel = useRef<HTMLElement>(null);
+  const previousCitation = useRef<HTMLButtonElement | null>(null);
 
-  async function onSubmit(event: FormEvent) {
+  useEffect(() => () => {
+    request.current?.abort();
+    request.current = null;
+  }, []);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const next = new AbortController();
-    setController(next);
-    setPending(true);
-    setError("");
-    setFinalAnswer(null);
-    setHits([]);
+    const query = question.trim();
+    if (!query || request.current) return;
+    const controller = new AbortController();
+    request.current = controller;
+    setAnswer({ kind: "pending" });
+    setSelectedId("");
+    previousCitation.current = null;
+    setCanReturn(false);
     try {
-      const result = await askQuestion(question, docType, next.signal);
-      setHits(result.hits);
-      setFinalAnswer(result.final);
-      setUsage(result.usage);
-      const first = result.final.claims.find((claim) => claim.sources[0])?.sources[0]?.chunk_id;
-      setSelectedId(first || result.hits[0]?.chunk_id || "");
-    } catch (caught) {
-      if (caught instanceof Error && caught.name !== "AbortError") {
-        setError(caught.message);
+      const result = await askQuestion(query, { docType, module }, controller.signal);
+      if (request.current !== controller) return;
+      const sources = orderEvidence(result.hits, result.final.claims);
+      setAnswer({ kind: "ready", query, result, sources });
+      setSelectedId(sources[0]?.hit.chunk_id ?? "");
+    } catch (error) {
+      if (request.current === controller) {
+        setAnswer({ kind: "error", message: requestFeedback(error, vi.queryError) });
       }
     } finally {
-      setPending(false);
-      setController(null);
+      if (request.current === controller) request.current = null;
     }
   }
 
-  const selected = hits.find((hit) => hit.chunk_id === selectedId) ?? null;
+  function cancel() {
+    const controller = request.current;
+    if (!controller) return;
+    request.current = null;
+    controller.abort();
+    setAnswer({ kind: "cancelled" });
+    input.current?.focus();
+  }
+
+  function openCitation(id: string, trigger: HTMLButtonElement) {
+    setSelectedId(id);
+    previousCitation.current = trigger;
+    setCanReturn(true);
+    panel.current?.focus({ preventScroll: true });
+    panel.current?.scrollIntoView({ block: "nearest" });
+  }
+
+  const sources = answer.kind === "ready" ? answer.sources : [];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <section className="grid gap-4">
-        <header>
-          <h1 className="text-2xl font-semibold tracking-tight">{vi.chatTitle}</h1>
-          <p className="mt-2 text-sm leading-6 text-stone-600">{vi.chatLead}</p>
-        </header>
-        <form onSubmit={onSubmit} className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4">
-          <label className="grid gap-1 text-sm">
-            {vi.docType}
-            <select
-              className="rounded border border-stone-300 px-2 py-2"
-              value={docType}
-              onChange={(event) => setDocType(event.target.value)}
-            >
-              <option value="">{vi.filterAll}</option>
-              {types.map((type) => (
-                <option key={type} value={type}>
-                  {vi.docTypes[type]}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="grid gap-1 text-sm">
-            {vi.question}
-            <textarea
-              className="min-h-24 rounded border border-stone-300 px-2 py-2"
-              value={question}
-              required
-              onChange={(event) => setQuestion(event.target.value)}
-            />
-          </label>
-          <div className="flex gap-2">
-            <button className="rounded bg-stone-900 px-3 py-2 text-sm text-white disabled:opacity-50" type="submit" disabled={pending}>
-              {vi.ask}
-            </button>
-            {pending ? (
-              <button className="rounded border border-stone-300 px-3 py-2 text-sm" type="button" onClick={() => controller?.abort()}>
-                {vi.stop}
-              </button>
-            ) : null}
-          </div>
-        </form>
-        {error ? <p className="text-sm text-red-700">{error}</p> : null}
-        {!finalAnswer && !pending && !error ? <p className="text-sm text-stone-600">{vi.emptyAnswer}</p> : null}
-        {finalAnswer?.insufficient_evidence ? <p className="text-sm text-stone-700">{vi.insufficient}</p> : null}
-        {finalAnswer && !finalAnswer.insufficient_evidence ? (
-          <article className="grid gap-3">
-            <p className="text-base leading-7">{finalAnswer.answer}</p>
-            <ul className="grid gap-2">
-              {finalAnswer.claims.map((claim) => (
-                <li key={claim.text} className="text-sm leading-6">
-                  {claim.text}{" "}
-                  {claim.status === "unverified" ? <span className="text-red-700">{vi.unverified}</span> : null}
-                  {claim.sources.map((source, index) => (
-                    <button
-                      key={source.chunk_id}
-                      type="button"
-                      className="ml-1 rounded border border-emerald-700 px-1.5 text-emerald-800"
-                      onClick={() => setSelectedId(source.chunk_id)}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                </li>
-              ))}
-            </ul>
-          </article>
-        ) : null}
-        {usage ? (
-          <p className="text-xs text-stone-500">
-            {vi.usage}: {usage.tokens_in} / {usage.tokens_out}. {vi.latency}: {usage.latency_ms} ms.
-          </p>
-        ) : null}
-      </section>
-      <aside className="rounded-lg border border-stone-200 bg-white p-4">
-        <h2 className="text-sm font-semibold">{vi.sourceTitle}</h2>
-        {selected ? (
-          <div className="mt-3 grid gap-2 text-sm">
-            <p className="font-medium">{selected.document_name}</p>
-            {selected.section_path.length > 0 && (
-              <p className="text-stone-600">{selected.section_path.join(" › ")}</p>
-            )}
-            <SourceLocation location={selected.loc} />
-            <p className="whitespace-pre-wrap leading-6">{selected.text}</p>
-          </div>
-        ) : (
-          <p className="mt-3 text-sm text-stone-600">{vi.sourceEmpty}</p>
-        )}
-      </aside>
-    </div>
+    <>
+      <PageBanner title={vi.chatTitle} description={vi.chatLead} variant="chat" />
+      <div className={styles.workbench}>
+        <div className={styles.mainColumn}>
+          <QuestionForm
+            question={question} setQuestion={setQuestion}
+            docType={docType} setDocType={setDocType} module={module} setModule={setModule}
+            input={input} onSubmit={submit} onCancel={cancel}
+            pending={answer.kind === "pending"} showExamples={answer.kind === "idle"}
+          />
+          <AnswerPanel state={answer} selectedId={selectedId} onCitation={openCitation} />
+        </div>
+        <SourcePanel
+          panel={panel} sources={sources} selectedId={selectedId} onSelect={setSelectedId}
+          onReturn={canReturn ? () => previousCitation.current?.focus() : undefined}
+          noResults={answer.kind === "ready" && sources.length === 0}
+        />
+      </div>
+    </>
   );
-}
-
-function SourceLocation({ location }: { location: SourceHit["loc"] }) {
-  const parts = [];
-  if (typeof location.paragraph_idx === "number") parts.push(vi.sourceBlock(location.paragraph_idx));
-  if (typeof location.row === "number") parts.push(vi.sourceRow(location.row));
-  return parts.length ? <p className="text-stone-600">{parts.join(" · ")}</p> : null;
 }

@@ -5,6 +5,19 @@ Next.js (App Router) + TypeScript strict + Tailwind + shadcn/ui + TanStack Query
 API client sinh từ OpenAPI (`openapi-typescript` + `openapi-fetch`). `pnpm gen:api` gọi `scripts/gen_api_client.sh`.
 UI mặc định tiếng Việt, chuỗi tập trung trong `lib/i18n/vi.ts` (dễ thêm tiếng Anh).
 
+## Thiết kế trải nghiệm QA
+
+Giao diện dùng Manrope cho tiêu đề và nội dung, chữ đơn cách cho số trích dẫn và số liệu. Nền xanh xám và panel sáng tạo khoảng đọc, xanh cobalt đánh dấu nguồn đang mở, hổ phách báo thiếu căn cứ. Hỗ trợ giao diện tối theo thiết lập hệ điều hành.
+
+```text
+Desktop                       Điện thoại
+┌ Đặt câu hỏi ┬ Nguồn ┐       Đặt câu hỏi
+│ Câu trả lời │ trích │       Câu trả lời [01]
+└─────────────┴───────┘       Nguồn [01] · Về trích dẫn
+```
+
+Số trích dẫn được đánh theo lần xuất hiện đầu tiên trong câu trả lời và dùng lại cho cùng một đoạn. Khi thiếu căn cứ, nguồn gần nhất được ghi là đoạn liên quan. Mở trích dẫn chuyển tiêu điểm đến panel nguồn và có nút quay lại.
+
 ## Nguyên tắc
 - Frontend **không chứa logic RAG**, không giữ API key LLM. Chỉ gọi `apps/api`.
 - Phần lớn trang là Client Component có TanStack Query; dùng Server Component cho layout/tĩnh.

@@ -2,26 +2,23 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { vi } from "@/lib/i18n/vi";
+import { Icon } from "@/components/ui/icon";
+import { WorkspaceNav } from "@/components/ui/workspace-nav";
 
 export function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-stone-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/documents" className="text-sm font-semibold tracking-tight">
+    <div>
+      <a href="#main-content" className="sr-only skip-link">{vi.skipToContent}</a>
+      <header className="topbar">
+        <div className="app-width topbar-inner">
+          <Link href="/documents" className="brand">
+            <span className="brand-mark"><Icon name="brand" size={22} /></span>
             {vi.shellTitle}
           </Link>
-          <nav className="flex gap-4 text-sm">
-            <Link href="/documents" className="text-stone-700 hover:text-stone-950">
-              {vi.navDocuments}
-            </Link>
-            <Link href="/chat" className="text-stone-700 hover:text-stone-950">
-              {vi.navChat}
-            </Link>
-          </nav>
+          <WorkspaceNav />
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main id="main-content" tabIndex={-1} className="app-width app-main">{children}</main>
     </div>
   );
 }

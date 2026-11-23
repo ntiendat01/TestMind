@@ -1,0 +1,81 @@
+.library {
+  display: grid;
+  grid-template-columns: minmax(275px, 1fr) minmax(0, 1.95fr);
+  align-items: start;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+.uploadForm { display: grid; gap: var(--space-4); padding: var(--space-6); }
+.dropzone {
+  display: grid; justify-items: center; align-content: center; min-height: 150px;
+  cursor: pointer; gap: var(--space-2); padding: var(--space-4);
+  border: 1px dashed var(--control-line); border-radius: var(--radius-panel);
+  background: var(--paper); text-align: center; color: var(--muted); font-size: 13px;
+  transition: background var(--motion), border-color var(--motion);
+}
+.dropzone strong { color: var(--ink); font-size: .925rem; font-weight: 800; }
+.dropzone:hover, .dropzone[data-dragging="true"], .dropzone:focus-within { background: var(--blue-soft); border-color: var(--blue); }
+.dropzone:focus-within { outline: 2px solid var(--blue); outline-offset: 3px; }
+.dropzone[data-disabled="true"] { cursor: not-allowed; opacity: .7; }
+.uploadIcon, .fileIcon { display: grid; place-items: center; border-radius: var(--radius-small); color: var(--blue); background: var(--blue-soft); }
+.uploadIcon { width: 42px; height: 42px; margin-bottom: var(--space-1); }
+.fileIcon { width: 37px; height: 37px; flex: none; }
+.uploadForm > button { justify-self: stretch; }
+.uploadForm :global(.feedback) a {
+  display: inline-flex; align-items: center; min-height: 44px;
+  font-size: 13px;
+}
+
+.list { min-height: 270px; }
+.listHeader { padding: var(--space-5) var(--space-6); display: grid; gap: var(--space-3); }
+.listTitle { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.listCount { background: var(--paper); color: var(--muted); border-radius: 6px; padding: 3px 8px; font-size: 12px; }
+.search { position: relative; display: grid; min-width: 0; color: var(--muted); }
+.search svg { position: absolute; top: 13px; left: 11px; pointer-events: none; }
+.search input { padding-left: 37px; }
+.listLabels, .listRow {
+  display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(103px, 1fr) 76px 62px;
+  align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6);
+}
+.listLabels { background: var(--paper); color: var(--muted); font-size: 13px; font-weight: 800; }
+.listRow { border-top: 1px solid var(--line); min-height: 72px; font-size: 14px; }
+.file { min-width: 0; display: flex; align-items: center; gap: var(--space-2); }
+.file strong, .file span:not(.fileIcon) { display: block; }
+.file strong { font-weight: 800; }
+.file span:not(.fileIcon) { font-size: 13px; }
+.statusCell { min-width: 0; }
+.statusCell small { display: block; font-size: 12px; line-height: 1.4; margin-top: var(--space-1); }
+.status {
+  display: inline-flex; gap: 6px; align-items: center; padding: 4px 7px; border-radius: 7px;
+  color: var(--amber); background: var(--amber-soft);
+  font-weight: 800; font-size: 12px;
+}
+.status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.status[data-status="ready"] { color: var(--success); background: var(--success-soft); }
+.status[data-status="failed"] { color: var(--danger); background: var(--danger-soft); }
+.listNumber { font-size: 13px; }
+.cellLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.listEmpty { display: grid; justify-items: center; align-content: center; gap: var(--space-3); min-height: 170px;
+  padding: var(--space-5); text-align: center; color: var(--muted);
+}
+.listEmpty svg { color: var(--blue); }
+.skeleton { width: min(100%, 240px); height: 12px; border-radius: var(--radius-small); background: var(--paper); }
+
+@media (max-width: 960px) {
+  .library { grid-template-columns: minmax(260px, 1fr) minmax(0, 1.6fr); gap: var(--space-4); }
+  .listRow, .listLabels { grid-template-columns: minmax(0, 1.4fr) minmax(92px, 1fr) 65px 46px; gap: var(--space-2); padding-inline: var(--space-4); }
+  .listHeader { padding-inline: var(--space-4); }
+}
+
+@media (max-width: 760px) {
+  .library { grid-template-columns: 1fr; margin-top: var(--space-4); }
+}
+
+@media (max-width: 540px) {
+  .uploadForm { padding: var(--space-4); }
+  .listLabels { display: none; }
+  .listRow { grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+  .file { grid-column: 1 / -1; }
+  .statusCell { grid-column: 1 / -1; }
+  .cellLabel { position: static; width: auto; height: auto; clip-path: none; color: var(--muted); font-family: var(--font-manrope), "Trebuchet MS", sans-serif; }
+}

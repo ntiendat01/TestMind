@@ -4,6 +4,12 @@ import type { ApiErrorBody, DocumentRow, FinalAnswer, JobRow, SourceHit, Usage }
 
 const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+export class ApiError extends Error {
+  constructor(public readonly code: string, public readonly status: number) {
+    super(code);
+  }
+}
+
 export function apiBase(): string {
   return base;
 }
@@ -28,13 +34,17 @@ export async function readJob(jobId: string): Promise<JobRow> {
 
 export async function askQuestion(
   query: string,
-  docType: string,
+  filters: { docType: string; module: string },
   signal: AbortSignal,
 ): Promise<{ hits: SourceHit[]; final: FinalAnswer; usage: Usage }> {
   const response = await fetch(`${base}/v1/query`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ query, doc_types: docType ? [docType] : [] }),
+    body: JSON.stringify({
+      query,
+      doc_types: filters.docType ? [filters.docType] : [],
+      module: filters.module.trim() || null,
+    }),
     signal,
   });
   if (!response.ok) {
@@ -68,11 +78,8 @@ async function readJson<T>(response: Response): Promise<T> {
 async function toError(response: Response): Promise<Error> {
   try {
     const body = (await response.json()) as ApiErrorBody;
-    return new Error(body.message || body.code);
-  } catch (error) {
-    if (error instanceof Error && error.message) {
-      return error;
-    }
-    return new Error(`HTTP ${response.status}`);
+    return new ApiError(body?.code || "request_failed", response.status);
+  } catch {
+    return new ApiError("request_failed", response.status);
   }
 }

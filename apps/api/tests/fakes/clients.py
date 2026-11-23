@@ -16,9 +16,9 @@ class TaggedEmbedder:
         for text in texts:
             lowered = text.lower()
             if "3.2" in text or "điều kiện" in lowered:
-                vectors.append([1.0, 0.0])
+                vectors.append([1.0, 0.0, *([0.0] * 1022)])
             else:
-                vectors.append([0.0, 1.0])
+                vectors.append([0.0, 1.0, *([0.0] * 1022)])
         return vectors
 
 

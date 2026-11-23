@@ -1,0 +1,7 @@
+tc_key,title,steps,expected,linked_req
+TC-045,Hoàn tiền ngày thứ bảy,Gửi yêu cầu vào ngày thứ bảy trước khi bàn giao vận chuyển,Yêu cầu hợp lệ,REQ-045
+TC-046,Hoàn tiền chia phương thức,Trả 75 nghìn qua thẻ và 25 nghìn qua ví rồi hoàn toàn phần,Hoàn 75 nghìn về thẻ và 25 nghìn về ví,REQ-046
+TC-047,Hàng hỏng thiếu ảnh,Đơn đã giao và có ảnh sản phẩm nhưng thiếu ảnh nhãn vận chuyển,Yêu cầu bổ sung ảnh nhãn vận chuyển,REQ-047
+TC-101,Mã giảm giá quá hạn,Áp mã hết hạn rồi kiểm tra lại giỏ hàng,Hiển thị lỗi và giữ nguyên sản phẩm trong giỏ,REQ-101
+TC-102,Gửi hai lần cùng giao dịch,Gửi lại request với cùng khóa idempotency và nội dung,Chỉ có một đơn được tạo,REQ-102
+TC-104,Đổi địa chỉ trước xác nhận,Đổi địa chỉ giao hàng sang vùng có phí cao hơn,Tổng mới hiển thị trước bước xác nhận,REQ-104

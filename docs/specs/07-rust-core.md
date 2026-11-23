@@ -60,6 +60,8 @@ ChunkDoc { id, ordinal, text, text_for_embedding, section_path, loc, requirement
            doc_type, module, is_active, token_count }
 ```
 
+`sheet` là chuỗi, `row` và `page` là số nguyên bắt đầu từ 1, `paragraph_idx` bắt đầu từ 0. Với DOCX, `paragraph_idx` chỉ vị trí khối trong thân tài liệu và `row` chỉ vị trí trong bảng. `fields` của hàng dữ liệu ánh xạ tên cột sang chuỗi hoặc null. `table` gồm `header: string[]` và `rows: string[][]`, giữ thứ tự dòng nguồn trước khi chunk.
+
 Thay đổi schema = cập nhật spec này + golden test + bản Python tham chiếu trong cùng commit.
 
 ## Index tantivy là dữ liệu dẫn xuất

@@ -74,7 +74,9 @@ không được ghi là "cải thiện".
 
 ## Runner & lưu kết quả
 
-- CLI: `make eval-dev CONFIG=config/exp/hybrid.yaml`, `make eval-test` (chỉ khi chốt).
+- Baseline dense đầu tiên dùng dev set giả lập refund/checkout, đo Recall@3/5/10, MRR, latency retrieval và ngưỡng từ chối. `config/exp/baseline.yaml` dùng cú pháp JSON tương thích YAML.
+- Runner chạy migration trong schema tạm, giữ Markdown và JSON trong `eval/reports/`. Smoke dùng hash embedder. Test độc lập đọc ngưỡng cố định từ `sufficiency_tau`.
+- CLI: `make eval-dev CONFIG=config/exp/baseline.yaml`, `make eval-test` (chỉ khi chốt).
 - Mỗi run lưu vào `eval_runs` + `eval/reports/<run_id>.md`: git SHA, config snapshot, model/version, prompt_version,
   seed, thời gian, tokens, cost, metric tổng + theo nhóm, danh sách câu **thất bại** (phân tích lỗi).
 - Chạy tất định: seed cố định, `temperature=0` cho generation/judge.

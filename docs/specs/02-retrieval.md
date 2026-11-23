@@ -54,6 +54,7 @@ Dedupe theo `chunk_id`; gộp chunk liền kề cùng section nếu cấu hình 
 
 - Điều kiện thiếu bằng chứng (ví dụ): không có ID khớp **và** top-1 `rerank/dense score` dưới ngưỡng `τ`.
 - `τ` **không đặt cảm tính**: hiệu chỉnh trên dev set (câu có đáp án vs không có đáp án) và lưu trong config.
+- Luồng dense đọc ngưỡng tùy chọn từ `RETRIEVAL_MIN_SIMILARITY` (cosine similarity). Khi chưa đặt, API từ chối trước LLM nếu không lấy được chunk nào. Báo cáo dev lưu ngưỡng ứng viên để xác nhận trên test độc lập trước khi áp dụng mặc định.
 - Khi thiếu: trả `insufficient_evidence=true` kèm các nguồn gần nhất (để người dùng tự xem), không gọi LLM sinh câu trả lời.
 - LLM cũng có quyền trả `insufficient_evidence` (lớp bảo vệ thứ hai).
 

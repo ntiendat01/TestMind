@@ -7,6 +7,20 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: testmind
+          POSTGRES_PASSWORD: testmind
+          POSTGRES_DB: testmind_integration
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U testmind -d testmind_integration"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -28,6 +42,10 @@ jobs:
         working-directory: apps/web
         run: pnpm install --frozen-lockfile
       - name: Check
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg://testmind:testmind@127.0.0.1:${{ job.services.postgres.ports[5432] }}/testmind_integration
         run: make check
       - name: Smoke eval
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg://testmind:testmind@127.0.0.1:${{ job.services.postgres.ports[5432] }}/testmind_integration
         run: make smoke

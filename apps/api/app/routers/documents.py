@@ -1,11 +1,11 @@
-"""Document upload. Markdown only in this slice."""
+"""List and upload documents."""
 
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 
 from app.container import Container
-from app.services.ingestion.pipeline import ingest_markdown
+from app.services.ingestion.pipeline import ingest_document
 
 router = APIRouter(tags=["documents"])
 
@@ -42,12 +42,13 @@ def upload_document(
     module: str | None = Form(None),
     container: Container = Depends(get_container),
 ) -> dict[str, object]:
-    data = file.file.read()
-    version = ingest_markdown(
+    data = file.file.read(container.settings.max_upload_bytes + 1)
+    version = ingest_document(
         filename=file.filename or "document.md",
         data=data,
         doc_type=doc_type,
         module=module or None,
+        content_type=file.content_type,
         store=container.store,
         embedder=container.embedder,
         counter=container.counter,

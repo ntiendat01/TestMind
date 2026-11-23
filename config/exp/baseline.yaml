@@ -1,0 +1,7 @@
+{
+  "dataset": "refund-checkout",
+  "embedding_model": "BAAI/bge-m3",
+  "retrieval_limit": 30,
+  "context_token_budget": 3000,
+  "seed": 0
+}

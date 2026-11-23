@@ -37,6 +37,7 @@ def ask(body: QueryRequest, container: Container = Depends(get_container)) -> St
         prompt_version=container.prompt_version,
         limit=container.settings.retrieval_limit,
         token_budget=container.settings.context_token_budget,
+        min_similarity=container.settings.retrieval_min_similarity,
     )
     return StreamingResponse(_events(outcome), media_type="text/event-stream")
 

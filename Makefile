@@ -6,7 +6,7 @@ file-length:
 	python3 scripts/check_file_length.py
 
 lint:
-	cd apps/api && uv run ruff check . && uv run ruff format --check .
+	cd apps/api && uv run ruff check . ../../eval/cli.py && uv run ruff format --check . ../../eval/cli.py
 	cd apps/web && pnpm exec eslint .
 
 typecheck:
@@ -18,8 +18,13 @@ test:
 	cd apps/api && uv run pytest --override-ini="testpaths=" ../../scripts/test_check_file_length.py
 	cd apps/web && pnpm test
 
-smoke eval-dev eval-test:
-	python3 eval/cli.py
+CONFIG ?= config/exp/baseline.yaml
+
+smoke:
+	cd apps/api && PYTHONPATH=. uv run python ../../eval/cli.py smoke --config "$(CONFIG)"
+
+eval-dev eval-test:
+	cd apps/api && PYTHONPATH=. uv run --no-sync python ../../eval/cli.py $(@:eval-%=%) --config "$(CONFIG)"
 
 reindex:
 	python3 scripts/reindex.py

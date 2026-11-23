@@ -126,7 +126,10 @@ export function AskDesk() {
         {selected ? (
           <div className="mt-3 grid gap-2 text-sm">
             <p className="font-medium">{selected.document_name}</p>
-            <p className="text-stone-600">{selected.section_path.join(" › ")}</p>
+            {selected.section_path.length > 0 && (
+              <p className="text-stone-600">{selected.section_path.join(" › ")}</p>
+            )}
+            <SourceLocation location={selected.loc} />
             <p className="whitespace-pre-wrap leading-6">{selected.text}</p>
           </div>
         ) : (
@@ -135,4 +138,11 @@ export function AskDesk() {
       </aside>
     </div>
   );
+}
+
+function SourceLocation({ location }: { location: SourceHit["loc"] }) {
+  const parts = [];
+  if (typeof location.paragraph_idx === "number") parts.push(vi.sourceBlock(location.paragraph_idx));
+  if (typeof location.row === "number") parts.push(vi.sourceRow(location.row));
+  return parts.length ? <p className="text-stone-600">{parts.join(" · ")}</p> : null;
 }

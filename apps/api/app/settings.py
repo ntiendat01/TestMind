@@ -6,6 +6,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.schemas.parsed import ChunkConfig
@@ -40,7 +41,13 @@ class Settings(BaseSettings):
     raw_dir: Path = Path("data/raw")
     max_upload_bytes: int = 20 * 1024 * 1024
     retrieval_limit: int = 30
+    retrieval_min_similarity: float | None = Field(default=None, ge=-1, le=1)
     context_token_budget: int = 3000
+
+    @field_validator("retrieval_min_similarity", mode="before")
+    @classmethod
+    def empty_similarity_is_unset(cls, value: object) -> object:
+        return None if value == "" else value
 
 
 @lru_cache

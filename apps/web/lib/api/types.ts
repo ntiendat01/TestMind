@@ -22,7 +22,7 @@ export type SourceHit = {
   chunk_id: string;
   score: number;
   section_path: string[];
-  loc: Record<string, number>;
+  loc: Record<string, number | string>;
   document_name: string;
   text: string;
 };
@@ -31,7 +31,7 @@ export type ClaimSource = {
   chunk_id: string;
   document_name: string;
   section_path: string[];
-  loc: Record<string, number>;
+  loc: Record<string, number | string>;
 };
 
 export type Claim = {

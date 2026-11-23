@@ -35,6 +35,7 @@ apps/web/
 
 ### /documents
 - Upload (drag & drop), chọn `doc_type`, `module`.
+- CSV UTF-8 và XLSX có header được upload trực tiếp. Source panel hiển thị vị trí đoạn, sheet hoặc dòng theo loại tài liệu.
 - Với Excel: bước **chọn ánh xạ cột** (xem preview 5 dòng đầu) trước khi ingest.
 - Bảng tài liệu: tên, loại, version, trạng thái job (polling `GET /v1/jobs/{id}`), số chunk, hành động (xoá, upload version mới).
 - Hiển thị lỗi ingestion rõ ràng.

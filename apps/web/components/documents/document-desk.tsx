@@ -73,7 +73,7 @@ export function DocumentDesk() {
           <input
             className="rounded border border-dashed border-stone-300 px-2 py-6 text-stone-600"
             type="file"
-            accept=".md,.txt,text/markdown,text/plain"
+            accept=".md,.txt,.csv,.xlsx,.docx"
             onChange={(event) => setFile(event.target.files?.[0] ?? null)}
           />
           <span className="text-xs text-stone-500">{file ? file.name : vi.dropHint}</span>

@@ -23,6 +23,7 @@ def answer_query(
     prompt_version: str,
     limit: int,
     token_budget: int,
+    min_similarity: float | None = None,
 ) -> QueryOutcome:
     started = time.perf_counter()
     hits = retrieve_dense(
@@ -35,8 +36,8 @@ def answer_query(
         limit=limit,
         token_budget=token_budget,
     )
-    if not hits:
-        outcome = _refuse(prompt_version)
+    if not hits or (min_similarity is not None and hits[0].score < min_similarity):
+        outcome = _refuse(prompt_version, hits)
     else:
         outcome = generate_answer(
             llm,
@@ -61,13 +62,13 @@ def answer_query(
     return outcome
 
 
-def _refuse(prompt_version: str) -> QueryOutcome:
+def _refuse(prompt_version: str, hits: list[SearchHit]) -> QueryOutcome:
     return QueryOutcome(
         insufficient_evidence=True,
         answer="",
         claims=[],
-        notes="No active chunk was retrieved.",
-        hits=[],
+        notes="Evidence score is below the required threshold." if hits else "No source was found.",
+        hits=hits,
         prompt_version=prompt_version,
         tokens_in=0,
         tokens_out=0,

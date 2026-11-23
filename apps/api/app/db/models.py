@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from app.db.base import Base
+from app.schemas.parsed import SourceLocation
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -44,7 +45,7 @@ class ChunkRow(Base):
     text: Mapped[str] = mapped_column(Text)
     text_for_embedding: Mapped[str] = mapped_column(Text)
     section_path: Mapped[list[str]] = mapped_column(ARRAY(Text))
-    loc: Mapped[dict[str, int]] = mapped_column(JSON)
+    loc: Mapped[SourceLocation] = mapped_column(JSON)
     requirement_ids: Mapped[list[str]] = mapped_column(ARRAY(Text))
     token_count: Mapped[int] = mapped_column(Integer)
     embedding: Mapped[list[float]] = mapped_column(Vector(1024))

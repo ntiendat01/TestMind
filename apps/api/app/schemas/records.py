@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from app.schemas.parsed import SourceLocation
+
 
 @dataclass
 class StoredChunk:
@@ -12,7 +14,7 @@ class StoredChunk:
     ordinal: int
     text: str
     section_path: tuple[str, ...]
-    loc: dict[str, int]
+    loc: SourceLocation
     requirement_ids: tuple[str, ...]
     token_count: int
     is_active: bool
@@ -48,7 +50,7 @@ class CitationSource:
     chunk_id: str
     document_name: str
     section_path: list[str]
-    loc: dict[str, int]
+    loc: SourceLocation
 
 
 @dataclass

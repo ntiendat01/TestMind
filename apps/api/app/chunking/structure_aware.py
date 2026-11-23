@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 
 from app.core.interfaces import TokenCounter
-from app.schemas.parsed import Block, ChunkConfig, ChunkDraft, ParsedDocument
+from app.schemas.parsed import Block, ChunkConfig, ChunkDraft, ParsedDocument, TableData
 
 _REQ = re.compile(r"REQ-\d+")
 
@@ -68,7 +69,11 @@ def _pack(blocks: list[Block], config: ChunkConfig, counter: TokenCounter) -> li
 
     for block in blocks:
         count = max(1, counter.count(block.text))
-        if block.kind == "table" or count > config.max_tokens:
+        if block.table is not None:
+            flush()
+            packed.extend([piece] for piece in _pack_table(block, block.table, config, counter))
+            continue
+        if block.kind in {"row", "table"} or count > config.max_tokens:
             flush()
             packed.append([block])
             continue
@@ -81,6 +86,39 @@ def _pack(blocks: list[Block], config: ChunkConfig, counter: TokenCounter) -> li
         tokens += count
     flush()
     return packed
+
+
+def _pack_table(
+    block: Block, table: TableData, config: ChunkConfig, counter: TokenCounter
+) -> list[Block]:
+    if not table.rows:
+        return [block]
+    parts: list[Block] = []
+    rows: list[str] = []
+    first = 2
+    tokens = 0
+    for number, cells in enumerate(table.rows, start=2):
+        row = " | ".join(
+            f"{label}: {value}" for label, value in zip(table.header, cells, strict=False) if value
+        )
+        if not row:
+            continue
+        count = max(1, counter.count(row))
+        if rows and tokens + count > config.max_tokens:
+            parts.append(_table_piece(block, rows, first))
+            rows = []
+            tokens = 0
+        if not rows:
+            first = number
+        rows.append(row)
+        tokens += count
+    if rows:
+        parts.append(_table_piece(block, rows, first))
+    return parts or [block]
+
+
+def _table_piece(block: Block, rows: list[str], first: int) -> Block:
+    return replace(block, text="\n".join(rows), loc={**block.loc, "row": first}, table=None)
 
 
 def _overlap(blocks: list[Block], overlap_tokens: int, counter: TokenCounter) -> list[Block]:

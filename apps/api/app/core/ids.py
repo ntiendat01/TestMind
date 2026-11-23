@@ -16,10 +16,10 @@ def content_hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def canonical_loc(loc: Mapping[str, int]) -> str:
+def canonical_loc(loc: Mapping[str, int | str]) -> str:
     return json.dumps(dict(loc), sort_keys=True, separators=(",", ":"))
 
 
-def make_chunk_id(version_id: str, loc: Mapping[str, int], ordinal: int) -> str:
+def make_chunk_id(version_id: str, loc: Mapping[str, int | str], ordinal: int) -> str:
     raw = f"{version_id}|{canonical_loc(loc)}|{ordinal}"
     return hashlib.sha1(raw.encode()).hexdigest()

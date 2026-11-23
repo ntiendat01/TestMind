@@ -70,7 +70,15 @@ Tham số mặc định (trong `config/chunking.yaml`, **phải tune trên dev s
 
 `queued → parsing → chunking → embedding → indexing → ready` hoặc `failed`. Lưu `progress` (0–100) và `error`.
 
-Lát cắt Markdown xử lý đồng bộ trong request. Client nhận `202`, rồi `GET /v1/jobs/{id}` thấy `ready` hoặc `failed`. Định dạng khác Markdown trả `400` cho tới khi parser của định dạng đó có mặt.
+Upload Markdown, TXT, CSV, XLSX và DOCX xử lý đồng bộ trong request. Client nhận `202`, rồi `GET /v1/jobs/{id}` thấy `ready` hoặc `failed`. Định dạng chưa có parser trả `400`.
+
+CSV dùng UTF-8 (chấp nhận BOM), dấu phẩy và hàng đầu làm header. Tên cột phải có nội dung và duy nhất. Bỏ hàng trống. Hàng có nhiều trường hơn header trả `400`. Mỗi bản ghi sinh một chunk mang `loc.row` là số dòng bắt đầu trong file, tính từ 1.
+
+XLSX dùng hàng có dữ liệu đầu tiên làm header cho mỗi sheet. Mỗi hàng dữ liệu có `loc.sheet` và `loc.row` (bắt đầu từ 1). Ô trống hoặc phần ô gộp thiếu giá trị được giữ là null. Cột thiếu tên dùng ký hiệu cột, kèm cảnh báo parser. Công thức dùng giá trị đã lưu trong file.
+
+DOCX duyệt đoạn và bảng theo thứ tự nội dung chính, giữ đường dẫn heading bằng style Heading của Word. `loc.paragraph_idx` là chỉ số khối bắt đầu từ 0, gồm cả bảng và đoạn trống. Bảng lớn tách theo nhóm dòng, lặp tên cột và dùng `loc.row` để đánh dấu dòng đầu của mỗi nhóm trong bảng.
+
+Với XLSX và DOCX, dung lượng sau giải nén giới hạn ở năm lần giới hạn upload.
 
 ## Embedding
 

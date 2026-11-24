@@ -1,9 +1,19 @@
 """Check metric denominators, score ties and fixed evaluation thresholds."""
 
 import json
+from math import log2
 from pathlib import Path
 
-from app.services.eval.metrics import Observation, best_threshold, mrr, recall_at
+from app.services.eval.metrics import (
+    Observation,
+    best_threshold,
+    evaluate_threshold,
+    mrr,
+    ndcg_at,
+    precision_at,
+    recall_at,
+    refusal_rates,
+)
 from app.services.eval.report import write_report
 
 
@@ -32,3 +42,14 @@ def test_fixed_threshold_is_not_tuned_on_holdout(tmp_path: Path) -> None:
     result = json.loads(prefix.with_suffix(".json").read_text())
     assert result["threshold_source"] == "fixed_config"
     assert result["threshold"] == {"minimum": 0.75, "false_answers": 1, "over_refusals": 0}
+
+
+def test_precision_and_ndcg_do_not_credit_duplicate_sources() -> None:
+    items = [Observation("a", "fact", True, frozenset({"a", "b"}), ("a", "a", "b"), 0.8, 1)]
+    assert precision_at(items, 5) == 2 / 5
+    assert ndcg_at(items, 3) == (1 + 0.5) / (1 + 1 / log2(3))
+    assert refusal_rates(items, evaluate_threshold(items, 0.9)) == {
+        "refusal_correct": None,
+        "false_accept_rate": None,
+        "over_refusal": 1.0,
+    }

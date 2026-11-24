@@ -8,7 +8,7 @@ from app.db.base import Base
 from app.schemas.parsed import SourceLocation
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -68,4 +68,17 @@ class QueryRow(Base):
     tokens_out: Mapped[int] = mapped_column(Integer)
     latency_ms: Mapped[int] = mapped_column(Integer)
     prompt_version: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class EvalRunRow(Base):
+    __tablename__ = "eval_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    dataset: Mapped[str] = mapped_column(String(200))
+    split: Mapped[str] = mapped_column(String(32))
+    config: Mapped[dict[str, object]] = mapped_column(JSONB)
+    git_sha: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    metrics: Mapped[dict[str, object]] = mapped_column(JSONB)
+    report: Mapped[dict[str, object]] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

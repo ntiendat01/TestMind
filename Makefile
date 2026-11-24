@@ -1,4 +1,4 @@
-.PHONY: check test lint typecheck file-length eval-dev eval-test reindex bench gen-api smoke
+.PHONY: check test lint typecheck file-length eval-dev eval-test eval-adversarial reindex bench gen-api smoke
 
 check: file-length lint typecheck test
 
@@ -23,7 +23,7 @@ CONFIG ?= config/exp/baseline.yaml
 smoke:
 	cd apps/api && PYTHONPATH=. uv run python ../../eval/cli.py smoke --config "$(CONFIG)"
 
-eval-dev eval-test:
+eval-dev eval-test eval-adversarial:
 	cd apps/api && PYTHONPATH=. uv run --no-sync python ../../eval/cli.py $(@:eval-%=%) --config "$(CONFIG)"
 
 reindex:

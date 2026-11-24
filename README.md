@@ -50,3 +50,10 @@ docker compose run --rm --entrypoint /srv/.venv/bin/python \
 Ngưỡng từ chối ứng viên được ghi trong báo cáo dev. Có thể cấu hình
 `RETRIEVAL_MIN_SIMILARITY` để thử trên API. `make eval-test` cần bộ test độc lập
 và `sufficiency_tau` cố định trong cấu hình trước khi chạy.
+
+Dev set M2 có 60 câu nháp và bộ adversarial có 10 câu. Sau khi chạy dev, sao chép
+cấu hình baseline và điền `sufficiency_tau` từ báo cáo để chạy
+`make eval-adversarial CONFIG=config/exp/baseline_frozen.yaml`.
+Runner ghi lịch sử trong schema `testmind_eval` của database kiểm thử, cần quyền
+tạo schema và áp migration. Tệp `.review.jsonl` cạnh báo cáo dành cho QA kiểm tra
+nhãn. Bộ test khóa và việc gán nhãn chéo cần người phụ trách dữ liệu hoàn tất.

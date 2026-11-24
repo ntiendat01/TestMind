@@ -76,6 +76,9 @@ không được ghi là "cải thiện".
 
 - Baseline dense đầu tiên dùng dev set giả lập refund/checkout, đo Recall@3/5/10, MRR, latency retrieval và ngưỡng từ chối. `config/exp/baseline.yaml` dùng cú pháp JSON tương thích YAML.
 - Runner chạy migration trong schema tạm, giữ Markdown và JSON trong `eval/reports/`. Smoke dùng hash embedder. Test độc lập đọc ngưỡng cố định từ `sufficiency_tau`.
+- M2 bổ sung Precision@5, nDCG@10 với relevance nhị phân, tỷ lệ sàng lọc sai và bảng quét ngưỡng dev trong JSON. Chỉ số false_accept_rate đo bước sàng lọc trước LLM.
+- `make eval-adversarial CONFIG=...` dùng ngưỡng cố định để kiểm tra retrieval trên câu đối kháng. Khả năng chống injection của generation cần thêm lượt gọi LLM và chấm đáp án.
+- Lịch sử được lưu trong `testmind_eval.eval_runs` ở database kiểm thử sau khi corpus tạm đã dọn. Mỗi run kèm UUID, hash dataset/corpus, nhãn trạng thái review và tệp `.review.jsonl`.
 - CLI: `make eval-dev CONFIG=config/exp/baseline.yaml`, `make eval-test` (chỉ khi chốt).
 - Mỗi run lưu vào `eval_runs` + `eval/reports/<run_id>.md`: git SHA, config snapshot, model/version, prompt_version,
   seed, thời gian, tokens, cost, metric tổng + theo nhóm, danh sách câu **thất bại** (phân tích lỗi).

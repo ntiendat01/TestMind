@@ -50,7 +50,11 @@ def load_questions(path: Path) -> list[EvalQuestion]:
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
-    if not questions or len({item.id for item in questions}) != len(questions):
+    if (
+        not questions
+        or len({item.id for item in questions}) != len(questions)
+        or len({item.question.strip().casefold() for item in questions}) != len(questions)
+    ):
         raise ValueError("Evaluation needs at least one question and unique IDs.")
     return questions
 
@@ -119,9 +123,20 @@ def _observe(
         kind=item.type,
         answerable=item.answerable,
         gold=frozenset(item.gold_chunks),
-        retrieved=tuple(_locator(hit) for hit in hits),
+        retrieved=tuple(dict.fromkeys(_locator(hit) for hit in hits)),
         top_score=hits[0].score if hits else None,
         latency_ms=latency_ms,
+        question=item.question,
+        expected_points=tuple(item.gold_answer_points),
+        sources=tuple(
+            {
+                "locator": _locator(hit),
+                "text": hit.chunk.text,
+                "score": hit.score,
+                "chunk_id": hit.chunk.id,
+            }
+            for hit in hits
+        ),
     )
 
 

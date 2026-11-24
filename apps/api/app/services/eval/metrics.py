@@ -1,7 +1,7 @@
 """Retrieval metrics and a refusal-threshold sweep on labeled dev queries."""
 
 from dataclasses import dataclass
-from math import nextafter
+from math import log2, nextafter
 from statistics import fmean
 
 
@@ -14,6 +14,9 @@ class Observation:
     retrieved: tuple[str, ...]
     top_score: float | None
     latency_ms: float
+    question: str = ""
+    expected_points: tuple[str, ...] = ()
+    sources: tuple[dict[str, object], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -42,6 +45,38 @@ def reciprocal_rank(item: Observation) -> float:
 
 def mrr(items: list[Observation]) -> float | None:
     return _mean([reciprocal_rank(item) for item in items if item.answerable])
+
+
+def precision_at(items: list[Observation], k: int) -> float | None:
+    return _mean(
+        [len(item.gold.intersection(item.retrieved[:k])) / k for item in items if item.answerable]
+    )
+
+
+def ndcg_at(items: list[Observation], k: int) -> float | None:
+    scores = []
+    for item in items:
+        if not item.answerable:
+            continue
+        seen: set[str] = set()
+        dcg = 0.0
+        for rank, hit in enumerate(item.retrieved[:k], start=1):
+            if hit in item.gold and hit not in seen:
+                dcg += 1 / log2(rank + 1)
+            seen.add(hit)
+        ideal = sum(1 / log2(rank + 1) for rank in range(1, min(k, len(item.gold)) + 1))
+        scores.append(dcg / ideal)
+    return _mean(scores)
+
+
+def refusal_rates(items: list[Observation], threshold: Threshold) -> dict[str, float | None]:
+    answerable = sum(item.answerable for item in items)
+    unanswerable = len(items) - answerable
+    return {
+        "refusal_correct": 1 - threshold.false_answers / unanswerable if unanswerable else None,
+        "false_accept_rate": threshold.false_answers / unanswerable if unanswerable else None,
+        "over_refusal": threshold.over_refusals / answerable if answerable else None,
+    }
 
 
 def _mean(values: list[float]) -> float | None:

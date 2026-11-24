@@ -157,6 +157,8 @@ sequenceDiagram
 | `queries` | id, text, filters, retrieved (JSONB), answer, tokens_in/out, latency_ms, cost, created_at |
 | `eval_runs` | id, dataset, split, config (JSONB), git_sha, metrics (JSONB), created_at |
 
+Migration `0002_eval_runs` thêm bảng `eval_runs`, gồm cả `report` JSONB để giữ toàn bộ quan sát và provenance. CLI lưu lịch sử bền vững trong schema `testmind_eval` của database kiểm thử; schema corpus tạm được dọn sau mỗi lần chạy. Ghi lại cùng run ID cập nhật một bản ghi.
+
 Chỉ mục: HNSW (hoặc ivfflat) trên `chunks.embedding` (lọc `is_active`), GIN trên `requirement_ids`,
 btree trên `(version_id, ordinal)`.
 

@@ -1,6 +1,7 @@
 """Run the dense baseline against a disposable pgvector schema."""
 
 import argparse
+import hashlib
 import os
 import platform
 import random
@@ -10,11 +11,13 @@ from datetime import UTC, datetime
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from uuid import uuid4
 
 from app.chunking.tokens import ApproximateTokenCounter
 from app.clients.embedder import BgeM3Embedder, HashEmbedder
 from app.core.interfaces import Embedder
 from app.db.repositories.documents import PostgresDocumentStore
+from app.db.repositories.eval_runs import save_run
 from app.db.workspace import migrated_workspace
 from app.services.eval.report import write_report
 from app.services.eval.runner import evaluate_dense, load_config, load_questions
@@ -25,7 +28,7 @@ _ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("split", choices=["dev", "test", "smoke"])
+    parser.add_argument("split", choices=["dev", "test", "smoke", "adversarial"])
     parser.add_argument("--config", type=Path, default=Path("config/exp/baseline.yaml"))
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -35,7 +38,7 @@ def main() -> int:
     question_path = dataset / f"{split}.jsonl"
     if not question_path.is_file():
         parser.error(f"Evaluation split does not exist: {question_path.relative_to(_ROOT)}")
-    if args.split == "test" and config.sufficiency_tau is None:
+    if args.split in {"test", "adversarial"} and config.sufficiency_tau is None:
         parser.error("Set a fixed sufficiency_tau in the config before evaluating the test set.")
     database_url = os.environ.get("TESTMIND_EVAL_DATABASE_URL") or os.environ.get(
         "TEST_DATABASE_URL"
@@ -80,8 +83,10 @@ def main() -> int:
         print(f"eval smoke: indexed fixture and retrieved sources for {len(items)} questions.")
         return 0
 
-    prefix = args.output or _ROOT / "eval" / "reports" / f"dense-{started:%Y%m%dT%H%M%SZ}"
+    run_id = str(uuid4())
+    prefix = args.output or _ROOT / "eval" / "reports" / f"dense-{started:%Y%m%dT%H%M%SZ}-{run_id}"
     metadata = {
+        "run_id": run_id,
         "dataset": config.dataset,
         "split": split,
         "git_sha": os.environ.get("EVAL_GIT_SHA") or _git("rev-parse", "HEAD"),
@@ -90,6 +95,9 @@ def main() -> int:
         else bool(_git("status", "--porcelain")),
         "model": embedder.model_name,
         "model_revision": os.environ.get("EVAL_MODEL_REVISION"),
+        "dataset_sha256": hashlib.sha256(question_path.read_bytes()).hexdigest(),
+        "corpus_sha256": _corpus_hash(dataset / "corpus"),
+        "labels_status": "agent_draft_pending_human_review",
         "runtime": _runtime(),
         "config": config.model_dump(),
         "chunking": asdict(chunk_config),
@@ -98,7 +106,13 @@ def main() -> int:
         "llm_tokens": 0,
         "llm_cost": 0,
     }
-    write_report(prefix, items, metadata, config.sufficiency_tau if split == "test" else None)
+    report = write_report(
+        prefix,
+        items,
+        metadata,
+        config.sufficiency_tau if split in {"test", "adversarial"} else None,
+    )
+    save_run(database_url, report)
     print(f"eval: wrote {prefix.with_suffix('.md')} and {prefix.with_suffix('.json')}.")
     return 0
 
@@ -121,6 +135,15 @@ def _runtime() -> dict[str, str]:
         except PackageNotFoundError:
             continue
     return installed
+
+
+def _corpus_hash(corpus: Path) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(file for file in corpus.iterdir() if file.is_file()):
+        digest.update(path.name.encode())
+        digest.update(b"\x00")
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()
 
 
 if __name__ == "__main__":

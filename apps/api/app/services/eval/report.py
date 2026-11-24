@@ -11,7 +11,11 @@ from app.services.eval.metrics import (
     best_threshold,
     evaluate_threshold,
     mrr,
+    ndcg_at,
+    precision_at,
     recall_at,
+    refusal_rates,
+    sweep_thresholds,
 )
 
 
@@ -20,19 +24,23 @@ def write_report(
     items: list[Observation],
     metadata: dict[str, object],
     fixed_threshold: float | None,
-) -> None:
+) -> dict[str, object]:
     threshold = (
         best_threshold(items)
         if fixed_threshold is None
         else evaluate_threshold(items, fixed_threshold)
     )
-    output = {
+    output: dict[str, object] = {
         "metadata": metadata,
         "observations": [asdict(item) | {"gold": sorted(item.gold)} for item in items],
         "metrics": _metrics(items),
         "latency_ms": _latency(items),
         "threshold": asdict(threshold),
         "threshold_source": "dev_sweep" if fixed_threshold is None else "fixed_config",
+        "refusal_rates": refusal_rates(items, threshold),
+        "threshold_sweep": [asdict(point) for point in sweep_thresholds(items)]
+        if fixed_threshold is None
+        else [],
     }
     prefix.parent.mkdir(parents=True, exist_ok=True)
     prefix.with_suffix(".json").write_text(
@@ -41,10 +49,36 @@ def write_report(
     prefix.with_suffix(".md").write_text(
         _markdown(items, metadata, threshold, fixed_threshold is None), encoding="utf-8"
     )
+    prefix.with_suffix(".review.jsonl").write_text(
+        "".join(
+            json.dumps(
+                {
+                    "id": item.id,
+                    "question": item.question,
+                    "answerable": item.answerable,
+                    "expected_points": item.expected_points,
+                    "gold": sorted(item.gold),
+                    "sources": item.sources,
+                    "reviewer": None,
+                    "label_accepted": None,
+                    "comments": None,
+                },
+                ensure_ascii=False,
+            )
+            + "\n"
+            for item in items
+        ),
+        encoding="utf-8",
+    )
+    return output
 
 
 def _metrics(items: list[Observation]) -> dict[str, float | None]:
-    return {f"recall@{k}": recall_at(items, k) for k in (3, 5, 10)} | {"mrr": mrr(items)}
+    return {f"recall@{k}": recall_at(items, k) for k in (3, 5, 10)} | {
+        "mrr": mrr(items),
+        "precision@5": precision_at(items, 5),
+        "ndcg@10_binary": ndcg_at(items, 10),
+    }
 
 
 def _latency(items: list[Observation]) -> dict[str, float]:
@@ -66,8 +100,8 @@ def _markdown(
         "Lần chạy đo retrieval và sàng lọc theo điểm. "
         "Chi phí API LLM bằng 0 vì bước này dừng ở retrieval.",
         "",
-        "| Nhóm | Số câu | Recall@3 | Recall@5 | Recall@10 | MRR |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| Nhóm | Số câu | Recall@3 | Recall@5 | Recall@10 | MRR | Precision@5 | nDCG@10 binary |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
         _metric_row("Tất cả", items),
     ]
     for kind in sorted({item.kind for item in items}):
@@ -84,6 +118,8 @@ def _markdown(
             f"là `{threshold.minimum:.17g}`.",
             f"Có {threshold.false_answers}/{len(items) - answerable} câu ngoài phạm vi vượt ngưỡng "
             f"và {threshold.over_refusals}/{answerable} câu có đáp án nằm dưới ngưỡng.",
+            "Các tỷ lệ đo quyết định sàng lọc theo điểm trước LLM. "
+            "Chất lượng câu trả lời và citation_support chờ lượt đánh giá generation.",
         ]
     )
     if swept:
@@ -100,8 +136,8 @@ def _markdown(
             "",
             "## Câu cần xem lại",
             "",
-            "| ID | Vấn đề | Nguồn đầu tiên | Nguồn kỳ vọng |",
-            "|---|---|---|---|",
+            "| ID | Câu hỏi | Vấn đề | Nguồn đầu tiên | Nguồn kỳ vọng |",
+            "|---|---|---|---|---|",
         ]
     )
     rows.extend(_failure_rows(items, threshold.minimum))
@@ -132,13 +168,14 @@ def _failure_rows(items: list[Observation], minimum: float) -> list[str]:
         passed = item.top_score is not None and item.top_score >= minimum
         reasons = []
         if passed and not item.answerable:
-            reasons.append("Ngoài phạm vi nhưng vượt ngưỡng")
+            reasons.append("Sàng lọc: ngoài phạm vi nhưng vượt ngưỡng")
         if not passed and item.answerable:
-            reasons.append("Có đáp án nhưng dưới ngưỡng")
+            reasons.append("Sàng lọc: có đáp án nhưng dưới ngưỡng")
         if item.answerable and not item.gold.issubset(item.retrieved[:3]):
-            reasons.append("Thiếu nguồn chuẩn trong top 3")
+            reasons.append("Retrieval: thiếu nguồn chuẩn trong top 3")
         if reasons:
             top = item.retrieved[0] if item.retrieved else "—"
             gold = ", ".join(sorted(item.gold)) or "—"
-            rows.append(f"| {item.id} | {', '.join(reasons)} | {top} | {gold} |")
-    return rows or ["| — | Không thấy lỗi theo các điều kiện trên | — | — |"]
+            question = item.question.replace("|", "\\|").replace("\n", " ")
+            rows.append(f"| {item.id} | {question} | {', '.join(reasons)} | {top} | {gold} |")
+    return rows or ["| — | — | Không thấy lỗi theo các điều kiện trên | — | — |"]

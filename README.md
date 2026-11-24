@@ -79,3 +79,8 @@ Tệp review chứa câu trả lời, claim và context để QA chấm faithful
 citation_support và hành vi làm theo injection. Các mục này chờ nhãn người đánh giá.
 Runner kiểm tra snapshot khớp dữ liệu và ghi checkpoint sau từng lượt. Nếu đặt
 `TESTMIND_EVAL_DATABASE_URL`, lịch sử được lưu thêm trong database kiểm thử.
+
+Lần đo ngày 24/11/2026 đã lưu tại `eval/reports/m2-generation-dev.md` và
+`m2-generation-adversarial.md`. Dev có ba lượt lỗi JSON ở max_tokens=800; kết quả
+chạy lại riêng ở max_tokens=1600 nằm trong `m2-generation-dev-recovery.md`.
+Khi review, dùng bản recovery cho cặp ID/context bị lỗi và giữ baseline gốc để đối chiếu.

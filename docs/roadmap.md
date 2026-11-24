@@ -19,7 +19,7 @@ pgvector; Q&A có citation + từ chối; Next.js `/documents` + `/chat` (SSE, S
 
 ## M2 — Evaluation Harness (1–1.5 tuần) ← làm sớm, trước khi tối ưu
 
-Tiến độ kỹ thuật cập nhật ngày 24/11/2026. Đã có 60 câu dev nháp, 10 câu đối kháng, metric retrieval, quét ngưỡng, báo cáo lỗi và lịch sử `eval_runs`. Runner generation chạy context retrieved/gold đã có kiểm thử bằng fake client, chờ API key để đo model thật. Các nhãn chờ QA duyệt và gán chéo. Test holdout khóa cùng đánh giá faithfulness, correctness và citation_support còn cần hoàn thiện trước khi nghiệm thu M2.
+Tiến độ kỹ thuật cập nhật ngày 24/11/2026. Đã có 60 câu dev nháp, 10 câu đối kháng, metric retrieval, quét ngưỡng, báo cáo lỗi và lịch sử `eval_runs`. Generation đã đo model thật trên 120 lượt dev và 20 lượt đối kháng với context retrieved/gold. Ba lượt dev lỗi JSON ở max_tokens=800 đã chạy lại thành công với max_tokens=1600 và có báo cáo recovery riêng. Các lượt thành công đều có citation validity=1, từ chối đúng câu ngoài phạm vi theo nhãn nháp. Các nhãn chờ QA duyệt và gán chéo. Test holdout khóa cùng đánh giá faithfulness, correctness và citation_support còn cần hoàn thiện trước khi nghiệm thu M2.
 
 **Deliverables:** `eval/` runner, dev/test split, 60–100 câu (có unanswerable + adversarial),
 metric (bản Python), báo cáo Markdown, bảng `eval_runs`, baseline đo thật.

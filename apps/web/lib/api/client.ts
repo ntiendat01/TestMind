@@ -1,6 +1,7 @@
 import { readSse } from "@/lib/sse/parse";
 
 import type { ApiErrorBody, DocumentRow, FinalAnswer, JobRow, SourceHit, Usage } from "./types";
+import type { ReviewCase, ReviewScore } from "./review";
 
 const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -12,6 +13,20 @@ export class ApiError extends Error {
 
 export function apiBase(): string {
   return base;
+}
+
+export async function validateReviewPacket(content: string): Promise<ReviewCase[]> {
+  return readJson(await fetch(`${base}/v1/eval/review/packet`, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ content }),
+  }));
+}
+
+export async function validateReviewScores(cases: ReviewCase[], content: string): Promise<ReviewScore[]> {
+  return readJson(await fetch(`${base}/v1/eval/review/scores/validate`, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ cases, content }),
+  }));
 }
 
 export async function listDocuments(): Promise<DocumentRow[]> {

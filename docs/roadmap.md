@@ -30,6 +30,10 @@ metric (bản Python), báo cáo Markdown, bảng `eval_runs`, baseline đo th�
 
 LLM judge đã chấm 40 context retrieved bằng DeepSeek-V4.1-Flash trên rubric version judge.generation.vi.1, không có lỗi hoặc bất đồng với agent trong mẫu này. Judge dùng cùng model với generator; kết quả cần đối chiếu với người trước khi nghiệm thu. Báo cáo ở `eval/reports/m2-qa40-judge.md`.
 
+Trang `/eval` hỗ trợ QA chấm thủ công từ packet, đọc nguồn, nhập lại và xuất điểm JSONL.
+API kiểm tra hash và rubric bằng cùng quy tắc với CLI. Chưa phát sinh điểm người chấm từ việc triển khai UI.
+Bước nghiệm thu tiếp theo là hai QA chấm độc lập, tổng hợp đồng thuận và duyệt holdout trước khi khóa test.
+
 ## M3 — Advanced Retrieval + Rust core (2–3 tuần)
 **Deliverables:** lexical BM25 (Python tham chiếu → **tantivy**), hybrid RRF, metadata filter, ID lookup,
 (tuỳ chọn) reranker; thí nghiệm E1–E8; port các module Rust (`lexical`, `parse_xlsx/csv/md`, `chunk`, `fusion`, `metrics`)

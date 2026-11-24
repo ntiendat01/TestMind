@@ -176,9 +176,15 @@ btree trên `(version_id, ordinal)`.
 | `POST /v1/trace/requirements/{key}` | Ứng viên test case + bằng chứng |
 | `PATCH /v1/trace/links/{id}` | Người dùng xác nhận/bác bỏ |
 | `POST /v1/eval/runs` / `GET /v1/eval/runs/{id}` | Chạy/xem eval |
+| `POST /v1/eval/review/packet` | Kiểm tra packet JSONL và hash quan sát |
+| `POST /v1/eval/review/scores/validate` | Kiểm tra điểm JSONL khớp packet, trả cả dòng đang chấm dở |
 | `GET /v1/health` | Health check |
 
 OpenAPI là hợp đồng; client TS sinh tự động.
+
+Hai endpoint review đã triển khai theo dạng stateless, không đọc hoặc ghi đường dẫn trên server,
+không gọi LLM hay database. Trang `/eval` nhập packet và xuất điểm để tổng hợp bằng CLI.
+Endpoint danh sách/chạy `eval_runs` vẫn là kế hoạch sau.
 
 ## 9. Cross-cutting
 

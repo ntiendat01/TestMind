@@ -91,6 +91,12 @@ Mẫu 40 câu đã nằm trong `eval/reports/m2-qa40.cases.jsonl`. Mỗi câu c�
 retrieved và gold. Người QA điền danh tính, điểm và ghi chú vào hai tệp
 `m2-qa40.reviewer-a.jsonl` và `m2-qa40.reviewer-b.jsonl`.
 Thang chấm và cách dùng null nằm trong `docs/specs/05-evaluation.md`.
+
+Có thể chấm tại `/eval` bằng cách mở `m2-qa40.cases.jsonl`, nhập tên người chấm,
+đọc nguồn rồi chọn điểm và ghi căn cứ. Bấm **Xuất điểm JSONL** để lưu vào máy.
+Mở cùng packet rồi **Nhập điểm đã lưu** để tiếp tục. Trang cần API đang chạy,
+không tự lưu điểm và không gọi LLM. Mỗi người dùng tệp riêng, đưa các tệp xuất vào
+`--scores` của lệnh bên dưới để tổng hợp. Điểm agent/judge không nhập vào biểu mẫu người chấm.
 Điểm Codex trong `m2-qa40.agent.jsonl` có nguồn đánh giá agent rõ ràng.
 
 Chạy từ gốc repo sau khi đã ghi điểm.

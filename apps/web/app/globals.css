@@ -178,3 +178,9 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+@media (max-width: 520px) {
+  .topbar-inner { flex-wrap: wrap; padding-block: var(--space-3); gap: var(--space-2); }
+  .topnav { width: 100%; margin-left: 0; }
+  .nav-link { flex: 1; justify-content: center; }
+}

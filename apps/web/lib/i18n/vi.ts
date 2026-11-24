@@ -1,4 +1,7 @@
+import { review } from "./vi-review";
+
 export const vi = {
+  review,
   shellTitle: "TestMind",
   navDocuments: "Tài liệu",
   navChat: "Hỏi đáp",

@@ -135,3 +135,23 @@ Câu từ chối có faithfulness và citation_support bằng null; correctness 
 Đáp án, câu hỏi và nguồn được gửi như dữ liệu JSON. Các điểm reviewer trước đó chỉ dùng so sánh cục bộ, không đưa vào prompt judge. JSON được kiểm tra đủ trường, thang điểm và điều kiện áp dụng; sai thì retry tối đa một lần. Lỗi cuối cùng giữ trong checkpoint, không biến thành điểm 0. Ba lỗi provider liên tiếp dừng run với trạng thái partial.
 
 Điểm model có reviewer_kind=judge, tách khỏi human và agent khi tổng hợp. Báo cáo so sánh từng tiêu chí trên case chung, kiểm tra hash quan sát và ghi từng bất đồng kèm nhận xét. Cohen kappa là null khi mọi cặp có cùng một nhãn. Sự đồng ý với agent chưa phải hiệu chuẩn bằng người. Judge cùng model với generator có nguy cơ thiên lệch tự đánh giá; cần QA chấm độc lập để kiểm chứng.
+
+### Workspace chấm thủ công
+
+Trang `/eval` mở `.cases.jsonl`, cho người QA đọc câu hỏi, đáp án, claim, nguồn và ý kỳ vọng,
+rồi nhập điểm cùng nhận xét. Mọi điểm khởi tạo là null. UI chỉ cho sửa tệp của một người chấm,
+không đổi điểm agent/judge thành human. Điểm không tự lưu lên server.
+
+- `POST /v1/eval/review/packet` nhận `{content}`, trả danh sách `ReviewCase` sau khi kiểm tra
+  packet không rỗng, ID không trùng và hash quan sát khớp nội dung.
+- `POST /v1/eval/review/scores/validate` nhận `{cases, content}`, kiểm tra lại packet và điểm bằng
+  cùng hàm với CLI. Trả danh sách `ReviewScore`, gồm cả dòng null và nhận xét đang viết dở.
+  CLI vẫn loại dòng chưa có nhãn khi tính metric.
+- Giới hạn body 8 MiB kể cả khi không có Content-Length, chuỗi JSONL tối đa 5 triệu ký tự,
+  packet tối đa 500 case. UI giới hạn mỗi tệp 5 MB, JSONL UTF-8. Tệp lỗi giữ nguyên phiên đang chấm.
+- Dòng đã chọn điểm cần danh tính và nhận xét trước khi xuất. Điểm từng phần được phép xuất,
+  câu từ chối giữ faithfulness/citation_support là null. Điểm được kiểm tra lại qua API trước khi tải xuống.
+- Tệp xuất có thể nhập lại để tiếp tục, rồi đưa vào `eval/review.py summarize`. Hash chỉ kiểm tra
+  tính nhất quán với nội dung packet, không chứng minh nguồn gốc tệp hoặc danh tính người chấm.
+
+Luồng này hỗ trợ thu thập đánh giá độc lập, không thay thế yêu cầu QA chấm 30–50 câu và gán chéo.

@@ -29,7 +29,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** List Documents */
+        get: operations["list_documents_v1_documents_get"];
         put?: never;
         /** Upload Document */
         post: operations["upload_document_v1_documents_post"];
@@ -73,6 +74,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/eval/review/packet": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Validate Packet */
+        post: operations["validate_packet_v1_eval_review_packet_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/eval/review/scores/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Validate Scores */
+        post: operations["validate_scores_v1_eval_review_scores_validate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -85,6 +120,85 @@ export interface components {
             doc_type: string;
             /** Module */
             module?: string | null;
+        };
+        /** GenerationObservation */
+        GenerationObservation: {
+            /** Id */
+            id: string;
+            /** Context */
+            context: string;
+            /** Question */
+            question: string;
+            /** Answerable */
+            answerable: boolean;
+            /** Expected Points */
+            expected_points: string[];
+            /** Sources */
+            sources: {
+                [key: string]: unknown;
+            }[];
+            /** Error */
+            error?: string | null;
+            /** Refused */
+            refused?: boolean | null;
+            /**
+             * Answer
+             * @default
+             */
+            answer: string;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /** Claims */
+            claims?: {
+                [key: string]: unknown;
+            }[];
+            /** Raw Claims */
+            raw_claims?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Citations Total
+             * @default 0
+             */
+            citations_total: number;
+            /**
+             * Citations Valid
+             * @default 0
+             */
+            citations_valid: number;
+            /**
+             * Claims Total
+             * @default 0
+             */
+            claims_total: number;
+            /**
+             * Claims Cited
+             * @default 0
+             */
+            claims_cited: number;
+            /**
+             * Tokens In
+             * @default 0
+             */
+            tokens_in: number;
+            /**
+             * Tokens Out
+             * @default 0
+             */
+            tokens_out: number;
+            /**
+             * Latency Ms
+             * @default 0
+             */
+            latency_ms: number;
+            /**
+             * Kind
+             * @default
+             */
+            kind: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -104,6 +218,66 @@ export interface components {
             doc_types?: string[];
             /** Module */
             module?: string | null;
+        };
+        /** ReviewCase */
+        ReviewCase: {
+            /** Case Id */
+            case_id: string;
+            /** Split */
+            split: string;
+            /** Source Run Id */
+            source_run_id: string;
+            /** Source Report Sha256 */
+            source_report_sha256: string;
+            /**
+             * Recovered
+             * @default false
+             */
+            recovered: boolean;
+            /** Observation Sha256 */
+            observation_sha256: string;
+            observation: components["schemas"]["GenerationObservation"];
+        };
+        /** ReviewPacketRequest */
+        ReviewPacketRequest: {
+            /** Content */
+            content: string;
+        };
+        /** ReviewScore */
+        ReviewScore: {
+            /** Case Id */
+            case_id: string;
+            /** Observation Sha256 */
+            observation_sha256: string;
+            /** Reviewer */
+            reviewer: string;
+            /**
+             * Reviewer Kind
+             * @enum {string}
+             */
+            reviewer_kind: "human" | "agent" | "judge";
+            /** Faithfulness */
+            faithfulness?: number | null;
+            /** Answer Correctness */
+            answer_correctness?: number | null;
+            /** Citation Support */
+            citation_support?: number | null;
+            /** Injection Followed */
+            injection_followed?: boolean | null;
+            /** Label Accepted */
+            label_accepted?: boolean | null;
+            /**
+             * Comments
+             * @default
+             */
+            comments: string;
+        };
+        /** ReviewScoresRequest */
+        ReviewScoresRequest: {
+            /** Content */
+            content: string;
+            /** Cases */
+            cases: components["schemas"]["ReviewCase"][];
         };
         /** ValidationError */
         ValidationError: {
@@ -143,6 +317,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    list_documents_v1_documents_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
                 };
             };
         };
@@ -235,6 +431,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    validate_packet_v1_eval_review_packet_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewPacketRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewCase"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    validate_scores_v1_eval_review_scores_validate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewScoresRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewScore"][];
                 };
             };
             /** @description Validation Error */

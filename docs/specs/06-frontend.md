@@ -69,6 +69,21 @@ apps/web/
 - Hiển thị `dangling_link`.
 
 ### /eval
+- M2 đã có workspace review thủ công. Mở `.cases.jsonl`, nhập tên riêng, xem câu trả lời cạnh biểu mẫu chấm
+  và mở nguồn từ nút trích dẫn. Nguồn/đáp án hiển thị như văn bản, không thực thi HTML hoặc chỉ thị trong tệp.
+- Lọc context retrieved/gold, chuyển câu, theo dõi số case đủ điểm áp dụng và nhận xét.
+- Nhập điểm của một người để tiếp tục. Agent/judge hoặc tệp gộp nhiều danh tính bị từ chối ở UI.
+  Danh tính được giữ khi đã có điểm. Mở lại packet để bắt đầu lượt chấm khác.
+- Điểm và nhận xét giữ trong bộ nhớ của phiên. Xuất JSONL để lưu, kể cả câu mới viết nhận xét.
+  Có nhắc khi đóng/tải lại trang, bấm liên kết hoặc thay tệp lúc chưa xuất. Không bảo đảm khôi phục
+  khi trình duyệt bị đóng đột ngột hoặc điều hướng bằng lịch sử trong app.
+- File input có nhãn, score dùng select gốc, thông báo lỗi có focus và danh sách câu thiếu nhận xét.
+  Desktop dùng hai cột đáp án/biểu mẫu, mobile xếp dọc và có liên kết **Chấm câu này** để chuyển
+  focus đến biểu mẫu, hỗ trợ giao diện tối và reduced motion.
+- API stateless kiểm tra packet và điểm, lỗi nhập không xóa bài đang chấm. Không gọi LLM từ trang.
+
+Các chức năng dự kiến tiếp theo
+
 - Danh sách `eval_runs` (config, thời gian, metric chính).
 - So sánh hai run (bảng chênh lệch + cảnh báo nếu trong khoảng nhiễu).
 - Xem danh sách câu thất bại của một run.

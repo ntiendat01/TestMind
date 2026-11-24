@@ -9,6 +9,7 @@ import { Icon } from "./icon";
 const destinations = [
   { href: "/documents", label: vi.navDocuments, icon: "document" },
   { href: "/chat", label: vi.navChat, icon: "chat" },
+  { href: "/eval", label: vi.review.nav, icon: "check" },
 ] as const;
 
 export function WorkspaceNav() {

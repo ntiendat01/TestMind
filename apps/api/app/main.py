@@ -8,6 +8,7 @@ from app.container import Container, build_container
 from app.core.errors import APIError
 from app.core.logging import configure_logging
 from app.routers.documents import router as documents_router
+from app.routers.eval import router as eval_router
 from app.routers.health import router as health_router
 from app.routers.jobs import router as jobs_router
 from app.routers.query import router as query_router
@@ -29,6 +30,7 @@ def create_app(container: Container | None = None) -> FastAPI:
     app.include_router(documents_router)
     app.include_router(jobs_router)
     app.include_router(query_router)
+    app.include_router(eval_router)
     app.add_exception_handler(APIError, _api_error)
     return app
 

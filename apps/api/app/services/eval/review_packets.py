@@ -160,11 +160,15 @@ def write_packets(prefix: Path, cases: list[ReviewCase]) -> None:
 
 
 def read_cases(path: Path) -> list[ReviewCase]:
-    cases = [
-        ReviewCase.model_validate_json(line)
-        for line in path.read_text().splitlines()
-        if line.strip()
-    ]
+    return parse_cases(path.read_text(encoding="utf-8"))
+
+
+def parse_cases(content: str) -> list[ReviewCase]:
+    cases = [ReviewCase.model_validate_json(line) for line in content.splitlines() if line.strip()]
+    return validate_cases(cases)
+
+
+def validate_cases(cases: list[ReviewCase]) -> list[ReviewCase]:
     if len({case.case_id for case in cases}) != len(cases) or not cases:
         raise ValueError("Case IDs must be unique and packet must be nonempty.")
     if any(case.observation_sha256 != observation_hash(case.observation) for case in cases):

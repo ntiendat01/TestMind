@@ -45,12 +45,18 @@ class ReviewScore(BaseModel):
 
 
 def load_scores(paths: list[Path], cases: list[ReviewCase]) -> list[ReviewScore]:
+    return parse_scores([path.read_text(encoding="utf-8") for path in paths], cases)
+
+
+def parse_scores(
+    contents: list[str], cases: list[ReviewCase], *, keep_pending: bool = False
+) -> list[ReviewScore]:
     known = {case.case_id: case for case in cases}
     scores = []
     seen: set[tuple[str, str]] = set()
     identities: dict[str, str] = {}
-    for path in paths:
-        for line in path.read_text(encoding="utf-8").splitlines():
+    for content in contents:
+        for line in content.splitlines():
             if not line.strip():
                 continue
             score = ReviewScore.model_validate_json(line)
@@ -61,7 +67,8 @@ def load_scores(paths: list[Path], cases: list[ReviewCase]) -> list[ReviewScore]
                 )
             validate_applicability(score, case)
             if not any(getattr(score, key) is not None for key in _LABEL_FIELDS):
-                continue
+                if not keep_pending:
+                    continue
             name = score.reviewer.strip()
             if name in identities and identities[name] != score.reviewer_kind:
                 raise ValueError("One reviewer identity must have a consistent reviewer kind.")

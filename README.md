@@ -57,3 +57,25 @@ cấu hình baseline và điền `sufficiency_tau` từ báo cáo để chạy
 Runner ghi lịch sử trong schema `testmind_eval` của database kiểm thử, cần quyền
 tạo schema và áp migration. Tệp `.review.jsonl` cạnh báo cáo dành cho QA kiểm tra
 nhãn. Bộ test khóa và việc gán nhãn chéo cần người phụ trách dữ liệu hoàn tất.
+
+## Đánh giá generation và citation
+
+Đặt `LLM_API_KEY` trong biến môi trường hoặc `.env` ở gốc repo, rồi chạy
+`make eval-generation RETRIEVAL_REPORT=eval/reports/m2-dense-dev.json`.
+Để dùng bộ đối kháng, đổi report thành `eval/reports/m2-dense-adversarial.json`.
+Mỗi câu gọi LLM hai lần, với context truy xuất và gold context. Đáp án kỳ vọng
+dùng để review được giữ ngoài prompt.
+
+Chạy thử ít câu bằng lệnh sau tại gốc repo.
+
+```sh
+cd apps/api
+PYTHONPATH=. uv run --no-sync python ../../eval/generation.py \
+  --retrieval-report ../../eval/reports/m2-dense-dev.json --limit 3
+```
+
+Báo cáo chứa tỷ lệ từ chối, citation validity thô và coverage của citation sau kiểm tra.
+Tệp review chứa câu trả lời, claim và context để QA chấm faithfulness, correctness,
+citation_support và hành vi làm theo injection. Các mục này chờ nhãn người đánh giá.
+Runner kiểm tra snapshot khớp dữ liệu và ghi checkpoint sau từng lượt. Nếu đặt
+`TESTMIND_EVAL_DATABASE_URL`, lịch sử được lưu thêm trong database kiểm thử.

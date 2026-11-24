@@ -77,7 +77,7 @@ không được ghi là "cải thiện".
 - Baseline dense đầu tiên dùng dev set giả lập refund/checkout, đo Recall@3/5/10, MRR, latency retrieval và ngưỡng từ chối. `config/exp/baseline.yaml` dùng cú pháp JSON tương thích YAML.
 - Runner chạy migration trong schema tạm, giữ Markdown và JSON trong `eval/reports/`. Smoke dùng hash embedder. Test độc lập đọc ngưỡng cố định từ `sufficiency_tau`.
 - M2 bổ sung Precision@5, nDCG@10 với relevance nhị phân, tỷ lệ sàng lọc sai và bảng quét ngưỡng dev trong JSON. Chỉ số false_accept_rate đo bước sàng lọc trước LLM.
-- `make eval-adversarial CONFIG=...` dùng ngưỡng cố định để kiểm tra retrieval trên câu đối kháng. Khả năng chống injection của generation cần thêm lượt gọi LLM và chấm đáp án.
+- `make eval-adversarial CONFIG=...` dùng ngưỡng cố định để kiểm tra retrieval trên câu đối kháng.
 - Lịch sử được lưu trong `testmind_eval.eval_runs` ở database kiểm thử sau khi corpus tạm đã dọn. Mỗi run kèm UUID, hash dataset/corpus, nhãn trạng thái review và tệp `.review.jsonl`.
 - CLI: `make eval-dev CONFIG=config/exp/baseline.yaml`, `make eval-test` (chỉ khi chốt).
 - Mỗi run lưu vào `eval_runs` + `eval/reports/<run_id>.md`: git SHA, config snapshot, model/version, prompt_version,
@@ -85,6 +85,16 @@ không được ghi là "cải thiện".
 - Chạy tất định: seed cố định, `temperature=0` cho generation/judge.
 - **Regression gate**: CI chạy eval nhỏ (smoke, ~10 câu, LLM giả hoặc cache) để bắt lỗi pipeline;
   eval đầy đủ chạy thủ công.
+
+### Generation và citation
+
+`make eval-generation RETRIEVAL_REPORT=eval/reports/m2-dense-dev.json` đọc snapshot retrieval đã đo, kiểm tra hash corpus và dataset rồi chạy mỗi câu với hai context. Context retrieved giữ nguyên đoạn đã truy xuất. Context gold dựng độc lập từ parser và chunker, ánh xạ locator tới tất cả chunk tương ứng. Câu không có đáp án có gold context rỗng. Hai lượt dùng cùng prompt production và bỏ qua cổng sufficiency retrieval để đo lớp LLM riêng. Ý đáp án kỳ vọng chỉ dùng cho review.
+
+Runner gọi `generate_answer` production, retry JSON tối đa một lần. Citation validity đếm ID thuộc context trong output thô đã parse, trước khi backend bỏ ID sai. Answer citation coverage là tỷ lệ câu trả lời có ít nhất một claim và mọi claim có citation hợp lệ. Các tỷ lệ từ chối đúng, false-answer và over-refusal tính trên lượt gọi thành công; lỗi được báo riêng theo context và nhóm câu.
+
+Token được cộng cả lần JSON lỗi trước retry. Giá provider chưa được cấu hình nên cost để null/TBD. Faithfulness, correctness, citation_support và injection_followed để QA chấm trong tệp review. Run chưa có đánh giá ngữ nghĩa sẽ giữ các metric đó là null.
+
+CLI ghi checkpoint mỗi câu, Markdown, JSON và review JSONL. Khi có `TESTMIND_EVAL_DATABASE_URL`, kết quả được lưu trong `eval_runs`. Sau ba lỗi provider liên tiếp, run dừng với trạng thái partial và exit code 1. Lỗi JSON cuối cùng vẫn được lưu, rồi tiếp tục câu tiếp theo. `--limit N` giới hạn N câu đầu cho chạy thử và được ghi vào metadata.
 
 ## Bảng kết quả (điền sau khi đo thật)
 

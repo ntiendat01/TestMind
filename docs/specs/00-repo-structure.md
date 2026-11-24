@@ -111,7 +111,8 @@ testmind-ai/
 │   │   ├── bug_gt.jsonl
 │   │   └── README.md             # nguồn, giấy phép, cách tạo, giới hạn
 │   ├── cli.py                    # entrypoint `make eval-*`
-│   └── reports/                  # báo cáo mỗi run (md + json)
+│   ├── generation.py             # replay snapshot retrieval và đối chiếu gold context
+│   └── reports/                  # báo cáo mỗi run (md + json + review + checkpoint)
 │
 ├── bench/
 │   ├── python_vs_rust/           # parse, index, search, chunk

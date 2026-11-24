@@ -198,3 +198,7 @@ Endpoint danh sách/chạy `eval_runs` vẫn là kế hoạch sau.
 
 `docker-compose.yml`: `web`, `api`, `postgres` (pgvector), volume cho raw files và index tantivy.
 `tm-core` được build thành wheel (maturin) trong image `api`. Chi phí/hosting: xem roadmap; mọi giá cần xác minh.
+
+Image API mặc định dùng PyTorch CPU trên Linux. BuildKit cache mount giữ gói uv/pnpm và
+cache Next.js ngoài image. Volume `api_models` giữ cache Hugging Face qua lần tạo lại
+container, với `HF_HOME=/srv/models`. Xem ADR 0006 và `bench/results/docker-build.md`.

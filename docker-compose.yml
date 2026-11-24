@@ -31,8 +31,10 @@ services:
       CONFIG_DIR: /srv/config
       WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
       RAW_DIR: /srv/data/raw
+      HF_HOME: /srv/models
     volumes:
       - api_raw:/srv/data
+      - api_models:/srv/models
     ports:
       - "8000:8000"
     depends_on:
@@ -55,3 +57,4 @@ services:
 volumes:
   pgdata:
   api_raw:
+  api_models:

@@ -124,6 +124,7 @@ testmind-ai/
 │
 ├── scripts/
 │   ├── check_file_length.py      # fail nếu file > 500 dòng (miễn lockfile + AUTO-GENERATED)
+│   ├── test_api_image.py         # smoke test image CPU, chạy trong Docker không có mạng
 │   ├── gen_api_client.sh         # OpenAPI -> TS client (header AUTO-GENERATED)
 │   ├── seed_demo.py              # nạp dataset mẫu
 │   └── reindex.py                # dựng lại tantivy từ Postgres

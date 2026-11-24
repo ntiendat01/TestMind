@@ -1,15 +1,16 @@
+# syntax=docker/dockerfile:1
 FROM node:20-bookworm-slim AS deps
 WORKDIR /srv
-RUN corepack enable
-COPY package.json pnpm-lock.yaml ./
-RUN corepack prepare pnpm@12.4.2 --activate && pnpm install --frozen-lockfile
-
-FROM node:20-bookworm-slim AS build
-WORKDIR /srv
 RUN corepack enable && corepack prepare pnpm@12.4.2 --activate
-COPY --from=deps /srv/node_modules ./node_modules
+COPY package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,id=testmind-web-pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile --store-dir=/pnpm/store
+
+FROM deps AS build
+ENV NEXT_TELEMETRY_DISABLED=1
 COPY . .
-RUN pnpm build
+RUN --mount=type=cache,id=testmind-web-next,target=/srv/.next/cache \
+    pnpm build
 
 FROM node:20-bookworm-slim AS runner
 WORKDIR /srv

@@ -14,6 +14,49 @@ docker compose up --build
 
 Đặt `LLM_API_KEY` trong `.env` (không commit) trước khi hỏi đáp. Model mặc định là `deepseek-ai/DeepSeek-V4.1-Flash-1017` trên `https://api.inference.wandb.ai/v1`. Lần embed đầu trong container tải `BAAI/bge-m3`.
 
+## Build nhanh khi phát triển
+
+Image API dùng PyTorch CPU. Docker giữ cache tải gói uv/pnpm và cache biên dịch Next.js
+giữa các lần build. Cache model nằm trong volume `api_models`, nên tạo lại container
+không phải tải BGE-M3 lại nếu đã tải xong trong volume này.
+
+Sau lần build đầu, chỉ khởi động lại bằng `docker compose up -d`.
+Khi đã sửa code, build đúng service cần cập nhật. Các lệnh dưới giả định Postgres/API
+phụ thuộc đã chạy từ lần khởi động đầu.
+
+```sh
+# Update frontend only
+docker compose up -d --build --no-deps web
+
+# Update backend only
+docker compose up -d --build --no-deps api
+
+# Apply changed API environment variables without rebuilding
+docker compose up -d --no-deps api
+```
+
+Khi sửa UI liên tục, có thể chạy Next.js trực tiếp để dùng Fast Refresh.
+Giữ API/Postgres trong Docker, dừng web container để nhường cổng 3000.
+
+```sh
+docker compose up -d postgres api
+docker compose stop web
+cd apps/web
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+Giữ build cache, tránh `--no-cache` hoặc prune cache thường xuyên. Lần đầu trên builder
+mới vẫn cần tải dependency. Xem số đo thật và giới hạn tại [báo cáo build](bench/results/docker-build.md).
+
+Kiểm tra image CPU sau khi build bằng lệnh sau. Không gọi mạng, LLM hoặc tải model.
+
+```sh
+docker run --rm --network none --entrypoint /srv/.venv/bin/python \
+  -v "$PWD/scripts/test_api_image.py:/srv/test_api_image.py:ro" \
+  testmind-api /srv/test_api_image.py
+```
+
 ## Kiểm tra
 
 ```bash

@@ -7,3 +7,9 @@
 **/.pytest_cache
 **/.mypy_cache
 **/.ruff_cache
+**/.env
+**/.env.*
+**/.cache
+**/target
+**/*.tsbuildinfo
+**/*.log

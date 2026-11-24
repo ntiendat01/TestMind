@@ -1,0 +1,76 @@
+{
+  "date": "2026-11-24",
+  "base_git_sha": "3f8e1169d5e6350f4ef784b01f5f0cd7cbc98136",
+  "working_tree_dirty": true,
+  "runs_per_scenario": 1,
+  "environment": {
+    "docker_engine": "29.7.2",
+    "compose": "5.5.1",
+    "builder": "desktop-linux",
+    "platform": "linux/amd64",
+    "cpus": 8,
+    "memory_bytes": 8322801664
+  },
+  "before": {
+    "api_history_id": "yznc8ij4zuszs9extdy8xdv1j",
+    "api_duration_display": "9m 35s",
+    "api_uv_sync_seconds": 282.9,
+    "api_export_seconds": 290.4,
+    "api_image_ls_size": "9.28GB",
+    "api_image_inspect_size_bytes": 3179832844,
+    "web_history_id": "3re7yg61ty9b6hv63b9yo4l0p",
+    "web_duration_display": "2m 47s",
+    "web_next_build_seconds": 159.9,
+    "web_dependency_layer_cached": true
+  },
+  "after_first_build": {
+    "command": "docker compose --progress plain build api web",
+    "exit_code": 0,
+    "wall_seconds": 176.774,
+    "api_history_id": "vrcjja7z0dqockxqvfdkng2c7",
+    "api_duration_display": "2m 45s",
+    "api_uv_sync_seconds": 60.2,
+    "api_export_seconds": 96.5,
+    "api_image_ls_size": "1.79GB",
+    "api_image_inspect_size_bytes": 384169916,
+    "web_history_id": "wmdb2yo7qfw95qsapnajrijgg",
+    "web_duration_display": "2m 54s",
+    "web_pnpm_install_seconds": 58.2,
+    "web_next_build_seconds": 95.0,
+    "new_cache_mounts_initially_empty": true
+  },
+  "after_unchanged_build": {
+    "command": "docker compose --progress plain build api web",
+    "exit_code": 0,
+    "wall_seconds": 6.527,
+    "api_uv_sync_cached": true,
+    "web_pnpm_install_cached": true,
+    "web_next_build_cached": true
+  },
+  "after_source_edit": [
+    {
+      "service": "api",
+      "source_edit": "apps/api/app/main.py",
+      "edit_in_temporary_copy": true,
+      "wall_seconds": 4.295,
+      "dependency_layer_cached": true,
+      "exit_code": 0
+    },
+    {
+      "service": "web",
+      "source_edit": "app/globals.css",
+      "edit_in_temporary_copy": true,
+      "wall_seconds": 69.058,
+      "dependency_layer_cached": true,
+      "next_build_seconds": 57.0,
+      "exit_code": 0
+    }
+  ],
+  "verification": {
+    "make_check": "passed",
+    "database_integration_tests_skipped": 2,
+    "offline_api_image_tests_passed": 3,
+    "web_routes_http_200": ["/documents", "/chat", "/eval"],
+    "compose_config": "passed"
+  }
+}

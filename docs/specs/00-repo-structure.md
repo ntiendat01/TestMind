@@ -106,12 +106,14 @@ testmind-ai/
 │   │   ├── corpus/               # BRD, testcase.xlsx, bugs.csv (giả lập/công khai)
 │   │   ├── dev.jsonl
 │   │   ├── test.jsonl            # KHÓA
+│   │   ├── holdout_draft.jsonl   # ứng viên chờ QA duyệt trước khi tạo test khóa
 │   │   ├── adversarial.jsonl
 │   │   ├── trace_gt.jsonl
 │   │   ├── bug_gt.jsonl
 │   │   └── README.md             # nguồn, giấy phép, cách tạo, giới hạn
 │   ├── cli.py                    # entrypoint `make eval-*`
 │   ├── generation.py             # replay snapshot retrieval và đối chiếu gold context
+│   ├── review.py                 # sample QA, xác thực điểm và tính đồng thuận
 │   └── reports/                  # báo cáo mỗi run (md + json + review + checkpoint)
 │
 ├── bench/

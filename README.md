@@ -84,3 +84,28 @@ Lần đo ngày 24/11/2026 đã lưu tại `eval/reports/m2-generation-dev.md` v
 `m2-generation-adversarial.md`. Dev có ba lượt lỗi JSON ở max_tokens=800; kết quả
 chạy lại riêng ở max_tokens=1600 nằm trong `m2-generation-dev-recovery.md`.
 Khi review, dùng bản recovery cho cặp ID/context bị lỗi và giữ baseline gốc để đối chiếu.
+
+## Review kết quả M2
+
+Mẫu 40 câu đã nằm trong `eval/reports/m2-qa40.cases.jsonl`. Mỗi câu có cả context
+retrieved và gold. Người QA điền danh tính, điểm và ghi chú vào hai tệp
+`m2-qa40.reviewer-a.jsonl` và `m2-qa40.reviewer-b.jsonl`.
+Thang chấm và cách dùng null nằm trong `docs/specs/05-evaluation.md`.
+Điểm Codex trong `m2-qa40.agent.jsonl` có nguồn đánh giá agent rõ ràng.
+
+Chạy từ gốc repo sau khi đã ghi điểm.
+
+```sh
+cd apps/api
+PYTHONPATH=. uv run --no-sync python ../../eval/review.py summarize \
+  --cases ../../eval/reports/m2-qa40.cases.jsonl \
+  --scores ../../eval/reports/m2-qa40.agent.jsonl \
+    ../../eval/reports/m2-qa40.reviewer-a.jsonl \
+    ../../eval/reports/m2-qa40.reviewer-b.jsonl \
+  --output ../../eval/reports/m2-qa40.summary.json
+```
+
+Runner kiểm tra hash quan sát và phát hiện điểm trùng reviewer. Điểm người và agent
+có bảng riêng; độ đồng thuận chỉ tính khi có hai người chấm cùng case.
+Mẫu ứng viên holdout ở `eval/datasets/refund-checkout/holdout_draft.jsonl` cần QA
+duyệt trước khi tạo bộ test khóa.

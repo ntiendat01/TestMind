@@ -14,3 +14,9 @@ Tất cả tài liệu và câu hỏi được viết riêng cho TestMind. Mã r
 - Mỗi lần chạy xuất `.review.jsonl` để QA điền `reviewer`, `label_accepted` và `comments`. Cần ít nhất hai người kiểm tra một mẫu trước khi chốt ground truth.
 - Chưa có test set khóa. Người phụ trách QA cần viết bộ holdout độc lập sau khi rà soát corpus. Runner yêu cầu ngưỡng cố định khi chạy test hoặc adversarial.
 - Nguồn do dự án tự tạo. Việc phát hành lại corpus cần chủ dự án chốt giấy phép.
+
+## Review và holdout
+
+`eval/reports/m2-qa40.cases.jsonl` giữ 80 context cho 40 câu được chọn bằng seed 0, gồm 30 câu dev và 10 câu đối kháng. Hai biểu mẫu reviewer-a/reviewer-b có điểm trống để người QA chấm độc lập. Điểm trong agent.jsonl do Codex ghi cho 40 context retrieved, chưa thay thế lượt gán nhãn chéo bởi người.
+
+`holdout_draft.jsonl` có 20 ứng viên mới, gồm 15 câu có đáp án và 5 câu ngoài phạm vi. Chúng do agent soạn từ cùng corpus và chờ QA kiểm tra tính độc lập. Bản nháp chưa được chạy eval hoặc dùng tune. Người phụ trách dữ liệu tạo và khóa test.jsonl sau khi chốt câu hỏi và nhãn.

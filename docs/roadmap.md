@@ -26,6 +26,8 @@ metric (bản Python), báo cáo Markdown, bảng `eval_runs`, baseline đo th�
 **Acceptance:** `make eval-dev` ra bảng baseline với số thật; có danh sách câu thất bại.
 **Rủi ro:** ground truth kém chất lượng (rủi ro lớn nhất của dự án) → nhờ ít nhất một người thứ hai gán nhãn một mẫu.
 
+Đã chuẩn bị sample review 40 câu / 80 context tại `eval/reports/m2-qa40.cases.jsonl`, hai biểu mẫu người chấm và bộ tổng hợp điểm/đồng thuận. Codex đã ghi nhận xét cho 40 context retrieved; thống kê người chấm hiện bằng 0. Có 20 ứng viên `holdout_draft.jsonl` chờ QA duyệt trước khi tạo test khóa.
+
 ## M3 — Advanced Retrieval + Rust core (2–3 tuần)
 **Deliverables:** lexical BM25 (Python tham chiếu → **tantivy**), hybrid RRF, metadata filter, ID lookup,
 (tuỳ chọn) reranker; thí nghiệm E1–E8; port các module Rust (`lexical`, `parse_xlsx/csv/md`, `chunk`, `fusion`, `metrics`)

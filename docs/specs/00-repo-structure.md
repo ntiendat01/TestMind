@@ -114,6 +114,7 @@ testmind-ai/
 │   ├── cli.py                    # entrypoint `make eval-*`
 │   ├── generation.py             # replay snapshot retrieval và đối chiếu gold context
 │   ├── review.py                 # sample QA, xác thực điểm và tính đồng thuận
+│   ├── judge.py                  # chấm rubric bằng LLM, so sánh reviewer
 │   └── reports/                  # báo cáo mỗi run (md + json + review + checkpoint)
 │
 ├── bench/

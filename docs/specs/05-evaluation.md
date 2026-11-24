@@ -127,3 +127,11 @@ Câu từ chối có faithfulness và citation_support bằng null; correctness 
 `eval/review.py summarize` báo trung bình theo case, context và loại reviewer, kèm số case thực sự có điểm. Dòng chưa chấm giữ null. Trên các case hai người cùng chấm, runner tính tỷ lệ đồng ý và Cohen kappa không trọng số riêng cho từng trường. Kappa là null nếu chưa có cặp hoặc không có biến thiên nhãn. Điểm agent không tham gia human agreement.
 
 `holdout_draft.jsonl` có 20 câu ứng viên do agent soạn, gồm 5 câu ngoài phạm vi. QA cần duyệt hoặc thay câu để chốt tính độc lập trước khi con người tạo và khóa test.jsonl. Bản nháp chưa dùng để tune hoặc chạy eval. Nghiệm thu M2 còn cần mẫu 30–50 câu được chấm bởi người, gán chéo một mẫu và chạy cấu hình chốt trên test độc lập.
+
+### LLM judge
+
+`make eval-judge` chấm 40 context retrieved trong packet QA bằng model được cấu hình, temperature=0, max_tokens=1600. CLI `eval/judge.py` cho chọn model bằng --model, context retrieved/gold/both và giới hạn số case. Prompt ở `config/prompts/judge_generation.vi.md`, có version và hash lưu theo run.
+
+Đáp án, câu hỏi và nguồn được gửi như dữ liệu JSON. Các điểm reviewer trước đó chỉ dùng so sánh cục bộ, không đưa vào prompt judge. JSON được kiểm tra đủ trường, thang điểm và điều kiện áp dụng; sai thì retry tối đa một lần. Lỗi cuối cùng giữ trong checkpoint, không biến thành điểm 0. Ba lỗi provider liên tiếp dừng run với trạng thái partial.
+
+Điểm model có reviewer_kind=judge, tách khỏi human và agent khi tổng hợp. Báo cáo so sánh từng tiêu chí trên case chung, kiểm tra hash quan sát và ghi từng bất đồng kèm nhận xét. Cohen kappa là null khi mọi cặp có cùng một nhãn. Sự đồng ý với agent chưa phải hiệu chuẩn bằng người. Judge cùng model với generator có nguy cơ thiên lệch tự đánh giá; cần QA chấm độc lập để kiểm chứng.

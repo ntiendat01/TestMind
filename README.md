@@ -109,3 +109,21 @@ Runner kiểm tra hash quan sát và phát hiện điểm trùng reviewer. Đi�
 có bảng riêng; độ đồng thuận chỉ tính khi có hai người chấm cùng case.
 Mẫu ứng viên holdout ở `eval/datasets/refund-checkout/holdout_draft.jsonl` cần QA
 duyệt trước khi tạo bộ test khóa.
+
+## Chấm bằng LLM judge
+
+`make eval-judge` dùng API key và model hiện có để chấm 40 context retrieved,
+rồi so sánh với điểm agent. Cần các lời gọi API có tính phí theo provider.
+Điểm judge có loại reviewer riêng và chưa được xem là điểm người chấm.
+
+Để chạy thử hai case hoặc chọn model judge khác, dùng CLI từ gốc repo.
+
+```sh
+cd apps/api
+PYTHONPATH=. uv run --no-sync python ../../eval/judge.py \
+  --cases ../../eval/reports/m2-qa40.cases.jsonl \
+  --compare ../../eval/reports/m2-qa40.agent.jsonl --limit 2
+```
+
+CLI hỗ trợ --model, --max-tokens, --context và --output. Báo cáo có điểm,
+token sử dụng, lỗi và bất đồng trên từng case. Điểm người chấm chưa có sẽ giữ null.

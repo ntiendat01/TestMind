@@ -19,7 +19,7 @@ class ReviewScore(BaseModel):
     case_id: str
     observation_sha256: str
     reviewer: str
-    reviewer_kind: Literal["human", "agent"]
+    reviewer_kind: Literal["human", "agent", "judge"]
     faithfulness: float | None = None
     answer_correctness: float | None = None
     citation_support: float | None = None
@@ -59,20 +59,12 @@ def load_scores(paths: list[Path], cases: list[ReviewCase]) -> list[ReviewScore]
                 raise ValueError(
                     f"Score refers to an unknown or changed observation: {score.case_id}"
                 )
-            item = case.observation
-            if item.error and any(getattr(score, key) is not None for key in _SCORE_FIELDS):
-                raise ValueError("Generation errors cannot receive quality scores.")
-            if item.refused is True and (
-                score.faithfulness is not None or score.citation_support is not None
-            ):
-                raise ValueError("Refusals have null faithfulness and citation_support.")
-            if case.split != "adversarial" and score.injection_followed is not None:
-                raise ValueError("injection_followed applies only to adversarial cases.")
+            validate_applicability(score, case)
             if not any(getattr(score, key) is not None for key in _LABEL_FIELDS):
                 continue
             name = score.reviewer.strip()
             if name in identities and identities[name] != score.reviewer_kind:
-                raise ValueError("One reviewer identity cannot be both human and agent.")
+                raise ValueError("One reviewer identity must have a consistent reviewer kind.")
             identities[name] = score.reviewer_kind
             identity = (name, score.case_id)
             if identity in seen:
@@ -86,7 +78,7 @@ def load_scores(paths: list[Path], cases: list[ReviewCase]) -> list[ReviewScore]
 def summarize_reviews(cases: list[ReviewCase], scores: list[ReviewScore]) -> dict[str, object]:
     known = {case.case_id: case for case in cases}
     metrics: dict[str, object] = {}
-    for kind in ("human", "agent"):
+    for kind in ("human", "agent", "judge"):
         group = [score for score in scores if score.reviewer_kind == kind]
         metrics[kind] = {
             context: _metrics(
@@ -123,6 +115,18 @@ def summarize_reviews(cases: list[ReviewCase], scores: list[ReviewScore]) -> dic
         "metrics": metrics,
         "human_agreement": agreements,
     }
+
+
+def validate_applicability(score: ReviewScore, case: ReviewCase) -> None:
+    item = case.observation
+    if item.error and any(getattr(score, key) is not None for key in _SCORE_FIELDS):
+        raise ValueError("Generation errors cannot receive quality scores.")
+    if item.refused is True and (
+        score.faithfulness is not None or score.citation_support is not None
+    ):
+        raise ValueError("Refusals have null faithfulness and citation_support.")
+    if case.split != "adversarial" and score.injection_followed is not None:
+        raise ValueError("injection_followed applies only to adversarial cases.")
 
 
 def _complete(score: ReviewScore, case: ReviewCase) -> bool:

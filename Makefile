@@ -1,4 +1,4 @@
-.PHONY: check test lint typecheck file-length eval-dev eval-test eval-adversarial eval-generation reindex bench gen-api smoke
+.PHONY: check test lint typecheck file-length eval-dev eval-test eval-adversarial eval-generation eval-judge reindex bench gen-api smoke
 
 check: file-length lint typecheck test
 
@@ -33,6 +33,9 @@ RETRIEVAL_REPORT ?= eval/reports/m2-dense-dev.json
 
 eval-generation:
 	cd apps/api && PYTHONPATH=. uv run --no-sync python ../../eval/generation.py --retrieval-report "$(abspath $(RETRIEVAL_REPORT))"
+
+eval-judge:
+	cd apps/api && PYTHONPATH=. uv run --no-sync python ../../eval/judge.py --cases ../../eval/reports/m2-qa40.cases.jsonl --compare ../../eval/reports/m2-qa40.agent.jsonl
 
 bench:
 	@echo "bench: Python vs Rust measurements start in M3."

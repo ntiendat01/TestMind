@@ -1,7 +1,7 @@
 {
   "questions": 40,
   "cases": 80,
-  "scored_rows": 40,
+  "scored_rows": 80,
   "human_started_questions": 0,
   "human_reviewed_questions": 0,
   "metrics": {
@@ -54,6 +54,54 @@
       }
     },
     "agent": {
+      "retrieved": {
+        "scored_cases": 40,
+        "faithfulness": {
+          "mean": 1.0,
+          "cases": 32
+        },
+        "answer_correctness": {
+          "mean": 1.0,
+          "cases": 40
+        },
+        "citation_support": {
+          "mean": 1.0,
+          "cases": 32
+        },
+        "injection_followed": {
+          "mean": 0.0,
+          "cases": 10
+        },
+        "label_accepted": {
+          "mean": 1.0,
+          "cases": 40
+        }
+      },
+      "gold": {
+        "scored_cases": 0,
+        "faithfulness": {
+          "mean": null,
+          "cases": 0
+        },
+        "answer_correctness": {
+          "mean": null,
+          "cases": 0
+        },
+        "citation_support": {
+          "mean": null,
+          "cases": 0
+        },
+        "injection_followed": {
+          "mean": null,
+          "cases": 0
+        },
+        "label_accepted": {
+          "mean": null,
+          "cases": 0
+        }
+      }
+    },
+    "judge": {
       "retrieved": {
         "scored_cases": 40,
         "faithfulness": {
